@@ -1,0 +1,1091 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Path of Exile - Text ARPG (Final)</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="app" class="grid">
+
+<!-- TOP BAR -->
+<div style="grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px;">
+  <div>
+    <span class="h1">🗡️ PATH OF EXILE</span>
+    <span style="color:var(--gold);margin-left:10px;">Text ARPG</span>
+  </div>
+  <div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap;">
+    <span class="icon icon-gold"></span>
+    <span id="gold-display" style="font-size:18px;color:var(--gold);">397</span>
+    <span style="margin:0 6px;">|</span>
+    <span id="save-status" style="color:#666;font-size:12px;">Gespeichert 13:16:25</span>
+    <button onclick="saveGame()">💾</button>
+    <button onclick="showSection(&#39;settings&#39;)">⚙️</button>
+  </div>
+</div>
+
+<!-- NAVIGATION -->
+<div id="nav-bar" class="" style="grid-column:1/-1;display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px;">
+  <button onclick="showSection(&#39;char&#39;)">👤 Charakter</button>
+  <button onclick="showSection(&#39;inventory&#39;)">🎒 Inventar</button>
+  <button onclick="showSection(&#39;tree&#39;)">🌳 Passivbaum</button>
+  <!-- Skills sind jetzt im Inventar via "💎 Sockeln" verfügbar -->
+  <button onclick="showSection(&#39;map&#39;)">🗺️ Karte</button>
+  <button onclick="showSection(&#39;town&#39;)">🏡 Stadt</button>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="grid2" style="grid-column:1/-1;">
+
+  <!-- LEFT COLUMN: CHARACTER & EQUIPMENT -->
+  <div>
+    <!-- CHARACTER SELECTION -->
+    <div id="section-char-select" class="panel hidden">
+      <h2>🎭 Klasse wählen</h2>
+      <div class="grid3" id="class-grid"><div class="item-card" id="class-card-Marauder" style="cursor: pointer; border-color: var(--gold);">
+      <h3>💪 Marauder</h3>
+      <div style="margin:8px 0;">
+        <p><strong>Attribute:</strong></p>
+        <p>💪 Stärke: 34</p>
+        <p>🏹 Geschick: 14</p>
+        <p>🧠 Intelligenz: 14</p>
+      </div>
+      <div style="margin:8px 0;">
+        <p><strong>Ascendancy:</strong> Juggernaut, Berserker, Chieftain</p>
+      </div>
+      <p style="font-size:12px;color:#aaa;margin-top:8px;">Starker Nahkämpfer mit hoher Lebenspunktzahl und physischem Schaden.</p>
+    </div><div class="item-card" id="class-card-Witch" style="cursor: pointer; border-color: rgb(68, 68, 68);">
+      <h3>🧠 Witch</h3>
+      <div style="margin:8px 0;">
+        <p><strong>Attribute:</strong></p>
+        <p>💪 Stärke: 14</p>
+        <p>🏹 Geschick: 14</p>
+        <p>🧠 Intelligenz: 34</p>
+      </div>
+      <div style="margin:8px 0;">
+        <p><strong>Ascendancy:</strong> Necromancer, Elementalist, Occultist</p>
+      </div>
+      <p style="font-size:12px;color:#aaa;margin-top:8px;">Zauberin mit mächtigen Elementarzaubern und hohem Manapool.</p>
+    </div><div class="item-card" id="class-card-Ranger" style="cursor: pointer; border-color: rgb(68, 68, 68);">
+      <h3>🏹 Ranger</h3>
+      <div style="margin:8px 0;">
+        <p><strong>Attribute:</strong></p>
+        <p>💪 Stärke: 14</p>
+        <p>🏹 Geschick: 34</p>
+        <p>🧠 Intelligenz: 14</p>
+      </div>
+      <div style="margin:8px 0;">
+        <p><strong>Ascendancy:</strong> Deadeye, Raider, Pathfinder</p>
+      </div>
+      <p style="font-size:12px;color:#aaa;margin-top:8px;">Schneller Fernkämpfer mit Projektilschaden und Ausweichen.</p>
+    </div><div class="item-card" id="class-card-Shadow" style="cursor: pointer; border-color: rgb(68, 68, 68);">
+      <h3>🎭 Shadow</h3>
+      <div style="margin:8px 0;">
+        <p><strong>Attribute:</strong></p>
+        <p>💪 Stärke: 14</p>
+        <p>🏹 Geschick: 24</p>
+        <p>🧠 Intelligenz: 24</p>
+      </div>
+      <div style="margin:8px 0;">
+        <p><strong>Ascendancy:</strong> Assassin, Saboteur, Trickster</p>
+      </div>
+      <p style="font-size:12px;color:#aaa;margin-top:8px;">Hybrid-Kämpfer mit kritischen Treffern und Chaosschaden.</p>
+    </div><div class="item-card" id="class-card-Templar" style="cursor: pointer; border-color: rgb(68, 68, 68);">
+      <h3>⚔️ Templar</h3>
+      <div style="margin:8px 0;">
+        <p><strong>Attribute:</strong></p>
+        <p>💪 Stärke: 24</p>
+        <p>🏹 Geschick: 14</p>
+        <p>🧠 Intelligenz: 24</p>
+      </div>
+      <div style="margin:8px 0;">
+        <p><strong>Ascendancy:</strong> Inquisitor, Hierophant, Guardian</p>
+      </div>
+      <p style="font-size:12px;color:#aaa;margin-top:8px;">Ausgewogener Kämpfer mit Stärke und Intelligenz.</p>
+    </div><div class="item-card" id="class-card-Duelist" style="cursor: pointer; border-color: rgb(68, 68, 68);">
+      <h3>⚔️ Duelist</h3>
+      <div style="margin:8px 0;">
+        <p><strong>Attribute:</strong></p>
+        <p>💪 Stärke: 24</p>
+        <p>🏹 Geschick: 24</p>
+        <p>🧠 Intelligenz: 14</p>
+      </div>
+      <div style="margin:8px 0;">
+        <p><strong>Ascendancy:</strong> Slayer, Gladiator, Champion</p>
+      </div>
+      <p style="font-size:12px;color:#aaa;margin-top:8px;">Flexibler Nahkämpfer mit Stärke und Geschick.</p>
+    </div><div class="item-card" id="class-card-Scion" style="cursor: pointer; border-color: rgb(68, 68, 68);">
+      <h3>👑 Scion</h3>
+      <div style="margin:8px 0;">
+        <p><strong>Attribute:</strong></p>
+        <p>💪 Stärke: 20</p>
+        <p>🏹 Geschick: 20</p>
+        <p>🧠 Intelligenz: 20</p>
+      </div>
+      <div style="margin:8px 0;">
+        <p><strong>Ascendancy:</strong> Ascendant</p>
+      </div>
+      <p style="font-size:12px;color:#aaa;margin-top:8px;">Allrounder mit ausgeglichenen Attributen.</p>
+    </div></div>
+      <div id="gem-choice-container" style="margin-top:15px;">
+        <h3 style="font-size:14px;margin-bottom:6px;color:var(--gold);">💎 Wähle deinen Start-Skill</h3>
+        <div id="gem-choice-grid" class="grid3"><div class="item-card" style="cursor: pointer; border-color: rgb(68, 68, 68);">
+      <h3 style="font-size:14px;">⚔️ Cleave</h3>
+      <p style="font-size:11px;color:#aaa;margin:4px 0;">Attack, AoE, Physical, Melee</p>
+      <p style="font-size:11px;">💙 6 Mana · ⚔️ 18 Schaden</p>
+      <p style="font-size:11px;color:#aaa;margin-top:6px;">Schlägt in einem Bogen vor dir und trifft alle Gegner.</p></div><div class="item-card" style="cursor: pointer; border-color: var(--gold);">
+      <h3 style="font-size:14px;">🌪️ Cyclone</h3>
+      <p style="font-size:11px;color:#aaa;margin:4px 0;">Attack, AoE, Physical, Melee</p>
+      <p style="font-size:11px;">💙 5 Mana · ⚔️ 16 Schaden</p>
+      <p style="font-size:11px;color:#aaa;margin-top:6px;">Dreht sich schnell und trifft alle Gegner in der Nähe.</p></div><div class="item-card" style="cursor: pointer; border-color: rgb(68, 68, 68);">
+      <h3 style="font-size:14px;">⚡ Arc</h3>
+      <p style="font-size:11px;color:#aaa;margin:4px 0;">Spell, Lightning, Chaining</p>
+      <p style="font-size:11px;">💙 8 Mana · ⚔️ 17 Schaden</p>
+      <p style="font-size:11px;color:#aaa;margin-top:6px;">Blitz schlägt zwischen nahen Gegnern ein.</p></div></div>
+      </div>
+      <div style="margin-top:15px;">
+        <input type="text" id="charNameInput" placeholder="Charaktername (z.B. MeinExile)" value="Exile" style="margin-bottom:8px;">
+        <button onclick="createCharacter()" style="width:100%;">✅ Charakter erstellen</button>
+      </div>
+    </div>
+
+    <!-- CHARACTER INFO -->
+    <div id="section-char" class="panel hidden">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <h2><span id="char-name">Exile</span> <span id="char-class" style="color:var(--gold)">💪 Marauder</span></h2>
+        <span id="char-level" style="color:#aaa;">Level 7</span>
+      </div>
+
+      <div class="tab-container">
+        <div class="tab active" onclick="showCharTab(&#39;stats&#39;)">📊 Attribute</div>
+        <div class="tab" onclick="showCharTab(&#39;defense&#39;)">🛡️ Verteidigung</div>
+        <div class="tab" onclick="showCharTab(&#39;offense&#39;)">⚔️ Offensiv</div>
+      </div>
+
+      <div class="tab-content" id="char-tab-stats">
+        <div id="stats-container">
+    <div class="stat">
+      <span><span class="icon icon-str"></span> Stärke</span>
+      <strong>67</strong>
+    </div>
+    <div class="stat">
+      <span><span class="icon icon-dex"></span> Geschick</span>
+      <strong>284</strong>
+    </div>
+    <div class="stat">
+      <span><span class="icon icon-int"></span> Intelligenz</span>
+      <strong>20</strong>
+    </div>
+    <div class="stat">
+      <span><span class="icon icon-life"></span> Leben</span>
+      <div class="bar life"><span style="width:100%"></span></div>
+      <strong>416 / 416</strong>
+    </div>
+    <div class="stat">
+      <span><span class="icon icon-mana"></span> Mana</span>
+      <div class="bar mana"><span style="width:100%"></span></div>
+      <strong>209 / 209</strong>
+    </div>
+    <div class="stat">
+      <span><span class="icon"></span> Energieschild</span>
+      <strong>50 / 78</strong>
+    </div>
+  </div>
+      </div>
+      <div class="tab-content hidden" id="char-tab-defense">
+        <div id="defense-container">
+    <div class="stat">
+      <span><span class="icon"></span> Rüstung</span>
+      <strong>221</strong>
+    </div>
+    <div class="stat">
+      <span><span class="icon"></span> Ausweichen</span>
+      <strong>557%</strong>
+    </div>
+    <div class="stat">
+      <span><span class="icon icon-fire"></span> Feuerresistenz</span>
+      <strong>0%</strong>
+    </div>
+    <div class="stat">
+      <span><span class="icon icon-cold"></span> Kälteresistenz</span>
+      <strong>31%</strong>
+    </div>
+    <div class="stat">
+      <span><span class="icon icon-lightning"></span> Blitzresistenz</span>
+      <strong>67%</strong>
+    </div>
+    <div class="stat">
+      <span><span class="icon icon-chaos"></span> Chaosresistenz</span>
+      <strong>9%</strong>
+    </div>
+  </div>
+      </div>
+      <div class="tab-content hidden" id="char-tab-offense">
+        <div id="offense-container">
+    <div class="stat">
+      <span><span class="icon"></span> Phys. Schaden</span>
+      <strong>16%</strong>
+    </div>
+    <div class="stat">
+      <span><span class="icon icon-fire"></span> Feuerschaden</span>
+      <strong>0%</strong>
+    </div>
+    <div class="stat">
+      <span><span class="icon icon-cold"></span> Kälteschaden</span>
+      <strong>57%</strong>
+    </div>
+    <div class="stat">
+      <span><span class="icon icon-lightning"></span> Blitzschaden</span>
+      <strong>41%</strong>
+    </div>
+    <div class="stat">
+      <span><span class="icon icon-chaos"></span> Chaosschaden</span>
+      <strong>35%</strong>
+    </div>
+    <div class="stat">
+      <span><span class="icon"></span> Angriffsgeschwindigkeit</span>
+      <strong>67%</strong>
+    </div>
+    <div class="stat">
+      <span><span class="icon"></span> Zaubergeschwindigkeit</span>
+      <strong>0%</strong>
+    </div>
+    <div class="stat">
+      <span><span class="icon"></span> Kritische Chance</span>
+      <strong>10%</strong>
+    </div>
+    <div class="stat">
+      <span><span class="icon"></span> Krit. Multiplikator</span>
+      <strong>1.5x</strong>
+    </div>
+    <div class="stat">
+      <span><span class="icon"></span> Item Rarity</span>
+      <strong>0%</strong>
+    </div>
+    <div class="stat">
+      <span><span class="icon"></span> Item Quantity</span>
+      <strong>0%</strong>
+    </div>
+  </div>
+      </div>
+
+      <h3 style="margin-top:15px;">⚔️ Ausrüstung</h3>
+      <div class="equipment-grid" id="equipment-grid"><div class="item-card" style="border-color: rgb(136, 136, 255);">
+    <div class="item-title">
+      <strong style="color:#8888ff">⚔️ Fox's Rustic Sword</strong>
+      <span style="color:#666;font-size:11px;">Waffe</span>
+    </div>
+  <p style="color:#888;font-size:11px;margin:4px 0;">Rustic Sword</p><div class="item-mods">Globaler Schaden: +18<br></div><div class="sock-row"><span class="sock-group"><span class="sock blue" title="BLUE - Leer"></span></span></div></div><div class="item-card" style="border-color: rgb(255, 255, 0);">
+    <div class="item-title">
+      <strong style="color:#ffff00">🛡️ Phoenix Shelter Leather Vest</strong>
+      <span style="color:#666;font-size:11px;">Rüstung</span>
+    </div>
+  <p style="color:#888;font-size:11px;margin:4px 0;">Leather Vest</p><div class="item-mods">Energieschild: +62<br>Kälteschaden: +28<br>Blitzresistenz: +18<br>Kälteresistenz: +14<br>Angriffsgeschwindigkeit: +7<br></div><div class="sock-row"><span class="sock-group"><span class="sock red" title="RED - 🌪️ Cyclone"></span><span class="sock-link"></span><span class="sock green" title="GREEN - ⚡ FasterAttacks"></span></span><span class="sock-group"><span class="sock blue" title="BLUE - Leer"></span></span></div></div><div class="item-card empty">🪖 Helm</div><div class="item-card empty">🧤 Handschuhe</div><div class="item-card empty">👢 Stiefel</div><div class="item-card" style="border-color: rgb(255, 136, 0);">
+    <div class="item-title">
+      <strong style="color:#ff8800">💍 Thread of Hope</strong>
+      <span style="color:#666;font-size:11px;">Accessoire</span>
+    </div>
+  <p style="color:#888;font-size:11px;margin:4px 0;">Ruby Ring</p><div class="item-mods">Geschick: +16<br>Blitzresistenz: +30<br>Mana: +97<br>Kälteresistenz: +17<br></div></div><div class="item-card" style="border-color: rgb(136, 136, 255);">
+    <div class="item-title">
+      <strong style="color:#8888ff">💍 Scholar's Leather Belt</strong>
+      <span style="color:#666;font-size:11px;">Accessoire</span>
+    </div>
+  <p style="color:#888;font-size:11px;margin:4px 0;">Leather Belt</p><div class="item-mods">Blitzresistenz: +19<br>Ausweichen: +37<br></div></div><div class="item-card" style="border-color: rgb(136, 136, 255);">
+    <div class="item-title">
+      <strong style="color:#8888ff">💍 Toxic Sapphire Ring</strong>
+      <span style="color:#666;font-size:11px;">Accessoire</span>
+    </div>
+  <p style="color:#888;font-size:11px;margin:4px 0;">Sapphire Ring</p><div class="item-mods">Physischer Schaden: +12<br>Zauberschaden: +14<br></div></div><div class="item-card" style="border-color: rgb(255, 255, 0);">
+    <div class="item-title">
+      <strong style="color:#ffff00">💍 Leather Belt</strong>
+      <span style="color:#666;font-size:11px;">Accessoire</span>
+    </div>
+  <div class="item-mods">Dienerschaden: +31<br>Blitzschaden: +41<br>Kälteschaden: +29<br>Geschick: +8<br>Chaosresistenz: +9<br>Chaosschaden: +35<br></div></div></div>
+    </div>
+  </div>
+
+  <!-- RIGHT COLUMN: INVENTORY & STASH -->
+  <div>
+    <!-- INVENTORY -->
+    <div id="section-inventory" class="panel hidden">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:8px;flex-wrap:wrap;">
+        <h2>🎒 Inventar</h2>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <span id="inv-count" style="color:#aaa;">15/120</span>
+          <button id="btn-identify-all" onclick="identifyAllItems()" title="Identifiziert alle unidentifizierten Items mit Scrolls of Wisdom">📜 Alle identifizieren (6) · 23 Scrolls</button>
+        </div>
+      </div>
+      <div class="inventory-grid" id="inventory-grid"><div class="item-card" style="border-color: rgb(136, 136, 255);">
+    <div class="item-title">
+      <strong style="color:#8888ff">💍 Iron Ring</strong>
+      
+    </div>
+  <p style="color:#ff6666;font-size:11px;margin:4px 0;">❔ Unidentifiziert</p><div class="item-actions"><button style="border-color: rgb(255, 102, 102);">📜 Identifizieren (23)</button><button>⚔️ Anlegen</button><button>🏦 Stash</button></div></div><div class="item-card" style="border-color: rgb(136, 136, 136);">
+    <div class="item-title">
+      <strong style="color:#888888">💍 Iron Ring</strong>
+      
+    </div>
+  <div class="item-actions"><button>⚔️ Anlegen</button><button>🏦 Stash</button></div></div><div class="item-card" style="border-color: rgb(136, 136, 136);">
+    <div class="item-title">
+      <strong style="color:#888888">💍 Ruby Ring</strong>
+      
+    </div>
+  <div class="item-actions"><button>⚔️ Anlegen</button><button>🏦 Stash</button></div></div><div class="item-card" style="border-color: rgb(136, 136, 136);">
+    <div class="item-title">
+      <strong style="color:#888888">⚔️ Iron Axe</strong>
+      
+    </div>
+  <div class="sock-row"><span class="sock-group"><span class="sock green" title="GREEN - Leer"></span></span></div><div class="item-actions"><button>⚔️ Anlegen</button><button style="border-color: var(--gold);">💎 Sockeln (0/1)</button><button>🏦 Stash</button></div></div><div class="item-card" style="border-color: rgb(255, 136, 0);">
+    <div class="item-title">
+      <strong style="color:#ff8800">⚔️ Mjolner</strong>
+      
+    </div>
+  <p style="color:#888;font-size:11px;margin:4px 0;">Goat's Horn</p><p style="color:#ff6666;font-size:11px;margin:4px 0;">❔ Unidentifiziert</p><p style="color:#ffd700;font-size:11px;margin:4px 0;font-style:italic;">Eine legendäre Waffe mit einzigartigen Eigenschaften.</p><div class="sock-row"><span class="sock-group"><span class="sock green" title="GREEN - Leer"></span></span></div><div class="item-actions"><button style="border-color: rgb(255, 102, 102);">📜 Identifizieren (23)</button><button>⚔️ Anlegen</button><button style="border-color: var(--gold);">💎 Sockeln (0/1)</button><button>🏦 Stash</button></div></div><div class="item-card" style="border-color: rgb(136, 136, 136);">
+    <div class="item-title">
+      <strong style="color:#888888">🛡️ Silk Robe</strong>
+      
+    </div>
+  <div class="sock-row"><span class="sock-group"><span class="sock green" title="GREEN - Leer"></span></span></div><div class="item-actions"><button>⚔️ Anlegen</button><button style="border-color: var(--gold);">💎 Sockeln (0/1)</button><button>🏦 Stash</button></div></div><div class="item-card" style="border-color: rgb(136, 136, 255);">
+    <div class="item-title">
+      <strong style="color:#8888ff">💍 Ruby Ring</strong>
+      
+    </div>
+  <p style="color:#ff6666;font-size:11px;margin:4px 0;">❔ Unidentifiziert</p><div class="item-actions"><button style="border-color: rgb(255, 102, 102);">📜 Identifizieren (23)</button><button>⚔️ Anlegen</button><button>🏦 Stash</button></div></div><div class="item-card" style="border-color: rgb(136, 136, 255);">
+    <div class="item-title">
+      <strong style="color:#8888ff">🛡️ Silk Robe</strong>
+      
+    </div>
+  <p style="color:#ff6666;font-size:11px;margin:4px 0;">❔ Unidentifiziert</p><div class="sock-row"><span class="sock-group"><span class="sock blue" title="BLUE - Leer"></span></span></div><div class="item-actions"><button style="border-color: rgb(255, 102, 102);">📜 Identifizieren (23)</button><button>⚔️ Anlegen</button><button style="border-color: var(--gold);">💎 Sockeln (0/1)</button><button>🏦 Stash</button></div></div><div class="item-card" style="border-color: rgb(136, 136, 136);">
+    <div class="item-title">
+      <strong style="color:#888888">⚔️ Iron Axe</strong>
+      
+    </div>
+  <div class="sock-row"><span class="sock-group"><span class="sock red" title="RED - Leer"></span></span></div><div class="item-actions"><button>⚔️ Anlegen</button><button style="border-color: var(--gold);">💎 Sockeln (0/1)</button><button>🏦 Stash</button></div></div><div class="item-card" style="border-color: rgb(136, 136, 136);">
+    <div class="item-title">
+      <strong style="color:#888888">💍 Amulet of Power</strong>
+      
+    </div>
+  <div class="item-actions"><button>⚔️ Anlegen</button><button>🏦 Stash</button></div></div><div class="item-card" style="border-color: rgb(255, 255, 0);">
+    <div class="item-title">
+      <strong style="color:#ffff00">⚔️ Rustic Sword</strong>
+      
+    </div>
+  <p style="color:#ff6666;font-size:11px;margin:4px 0;">❔ Unidentifiziert</p><div class="sock-row"><span class="sock-group"><span class="sock green" title="GREEN - Leer"></span></span></div><div class="item-actions"><button style="border-color: rgb(255, 102, 102);">📜 Identifizieren (23)</button><button>⚔️ Anlegen</button><button style="border-color: var(--gold);">💎 Sockeln (0/1)</button><button>🏦 Stash</button></div></div><div class="item-card" style="border-color: rgb(136, 136, 136);">
+    <div class="item-title">
+      <strong style="color:#888888">💍 Iron Ring</strong>
+      
+    </div>
+  <div class="item-actions"><button>⚔️ Anlegen</button><button>🏦 Stash</button></div></div><div class="item-card" style="border-color: rgb(136, 136, 255);">
+    <div class="item-title">
+      <strong style="color:#8888ff">💍 Ruby Ring</strong>
+      
+    </div>
+  <p style="color:#ff6666;font-size:11px;margin:4px 0;">❔ Unidentifiziert</p><div class="item-actions"><button style="border-color: rgb(255, 102, 102);">📜 Identifizieren (23)</button><button>⚔️ Anlegen</button><button>🏦 Stash</button></div></div><div class="item-card" style="border-color: rgb(136, 136, 136);">
+    <div class="item-title">
+      <strong style="color:#888888">💍 Amulet of Power</strong>
+      
+    </div>
+  <div class="item-actions"><button>⚔️ Anlegen</button><button>🏦 Stash</button></div></div><div class="item-card" style="border-color: rgb(136, 136, 136);">
+    <div class="item-title">
+      <strong style="color:#888888">🛡️ Plate Vest</strong>
+      
+    </div>
+  <div class="sock-row"><span class="sock-group"><span class="sock green" title="GREEN - Leer"></span></span><span class="sock-group"><span class="sock red" title="RED - Leer"></span></span></div><div class="item-actions"><button>⚔️ Anlegen</button><button style="border-color: var(--gold);">💎 Sockeln (0/2)</button><button>🏦 Stash</button></div></div></div>
+
+      <h3 style="margin-top:15px;">💰 Währungen</h3>
+      <div class="flex" id="currency-list"><div class="item-card" style="min-width: auto; padding: 6px 10px; border-color: rgb(85, 85, 85); cursor: pointer;">
+      <span style="color:var(--gold);font-size:13px;">📜 Scroll of Wisdom</span>
+      <span style="color:#ccc;font-size:12px;">x23 · klicken</span>
+    </div><div class="item-card" style="min-width: auto; padding: 6px 10px; border-color: rgb(51, 51, 51); cursor: default;">
+      <span style="color:var(--gold);font-size:13px;">💰 Portal Scroll</span>
+      <span style="color:#ccc;font-size:12px;">x12</span>
+    </div><div class="item-card" style="min-width: auto; padding: 6px 10px; border-color: rgb(85, 85, 85); cursor: pointer;">
+      <span style="color:var(--gold);font-size:13px;">🔗 Fusing Orb</span>
+      <span style="color:#ccc;font-size:12px;">x9 · klicken</span>
+    </div><div class="item-card" style="min-width: auto; padding: 6px 10px; border-color: rgb(85, 85, 85); cursor: pointer;">
+      <span style="color:var(--gold);font-size:13px;">🎨 Chromatic Orb</span>
+      <span style="color:#ccc;font-size:12px;">x6 · klicken</span>
+    </div><div class="item-card" style="min-width: auto; padding: 6px 10px; border-color: rgb(85, 85, 85); cursor: pointer;">
+      <span style="color:var(--gold);font-size:13px;">✨ Exalted Orb</span>
+      <span style="color:#ccc;font-size:12px;">x1 · klicken</span>
+    </div><div class="item-card" style="min-width: auto; padding: 6px 10px; border-color: rgb(85, 85, 85); cursor: pointer;">
+      <span style="color:var(--gold);font-size:13px;">🔵 Transmutation Orb</span>
+      <span style="color:#ccc;font-size:12px;">x3 · klicken</span>
+    </div><div class="item-card" style="min-width: auto; padding: 6px 10px; border-color: rgb(85, 85, 85); cursor: pointer;">
+      <span style="color:var(--gold);font-size:13px;">🔘 Jeweller's Orb</span>
+      <span style="color:#ccc;font-size:12px;">x2 · klicken</span>
+    </div><div class="item-card" style="min-width: auto; padding: 6px 10px; border-color: rgb(85, 85, 85); cursor: pointer;">
+      <span style="color:var(--gold);font-size:13px;">🔷 Augmentation Orb</span>
+      <span style="color:#ccc;font-size:12px;">x7 · klicken</span>
+    </div></div>
+    </div>
+
+    <!-- STASH -->
+    <div id="section-stash" class="panel hidden">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <h2>🏦 Lagertruhe</h2>
+        <span id="stash-count" style="color:#aaa;">0/500</span>
+      </div>
+      <div class="stash-grid" id="stash-grid"></div>
+      <button onclick="sortStash()" style="margin-top:8px;width:100%;">🔄 Stash sortieren</button>
+    </div>
+  </div>
+</div>
+
+<!-- PASSIVE TREE -->
+<div id="section-tree" class="panel hidden" style="grid-column:1/-1;">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px;">
+    <h2>🌳 Passivbaum</h2>
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+      <span id="tree-points" style="color:var(--gold);font-size:14px;">(0 Punkte verfügbar)</span>
+      <select id="tree-filter" onchange="renderTree()" style="width:auto;">
+        <option value="all">Alle Knoten</option>
+        <option value="Marauder">💪 Marauder (Stärke)</option>
+        <option value="Witch">🧠 Witch (Intelligenz)</option>
+        <option value="Ranger">🏹 Ranger (Geschick)</option>
+        <option value="Shadow">🎭 Shadow</option>
+        <option value="Templar">⚔️ Templar</option>
+        <option value="Duelist">⚔️ Duelist</option>
+        <option value="all-hybrid">🌟 Zentrum (Scion)</option>
+        <option value="notable">⭐ Bemerkenswerte</option>
+        <option value="keystone">💎 Keystones</option>
+      </select>
+      <button onclick="resetTree()">🔄 Zurücksetzen</button>
+    </div>
+  </div>
+  <div style="font-size:12px;color:#666;margin-bottom:6px;">Scrollen zum Zoomen • Ziehen zum Verschieben • Klicken zum Allokieren</div>
+  <div class="tree-container" id="tree-container">
+    <svg id="tree-svg-canvas" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1799 618" width="1799" height="618"><g transform="translate(-236.4340000000003,-98.18600000000009) scale(1.3310000000000004)"><circle cx="899.5" cy="309" r="63.036" fill="none" stroke="#1e2030" stroke-width="1" stroke-dasharray="4,8"></circle><circle cx="899.5" cy="309" r="96.65520000000001" fill="none" stroke="#1e2030" stroke-width="1" stroke-dasharray="4,10"></circle><circle cx="899.5" cy="309" r="134.4768" fill="none" stroke="#1e2030" stroke-width="1" stroke-dasharray="4,12"></circle><circle cx="899.5" cy="309" r="172.2984" fill="none" stroke="#1e2030" stroke-width="1" stroke-dasharray="4,14"></circle><circle cx="899.5" cy="309" r="214.32240000000002" fill="none" stroke="#1e2030" stroke-width="1" stroke-dasharray="4,16"></circle><line x1="899.5" y1="309" x2="713.8913569999501" y2="201.83879999999996" stroke="#1e2535" stroke-width="1"></line><line x1="899.5" y1="309" x2="899.5" y2="94.67759999999998" stroke="#1e2535" stroke-width="1"></line><line x1="899.5" y1="309" x2="1085.10864300005" y2="201.83879999999988" stroke="#1e2535" stroke-width="1"></line><line x1="899.5" y1="309" x2="1085.10864300005" y2="416.1612" stroke="#1e2535" stroke-width="1"></line><line x1="899.5" y1="309" x2="899.5" y2="523.3224" stroke="#1e2535" stroke-width="1"></line><line x1="899.5" y1="309" x2="713.89135699995" y2="416.1612" stroke="#1e2535" stroke-width="1"></line><line x1="899.5" y1="309" x2="1113.8224" y2="309" stroke="#1e2535" stroke-width="1"></line><line x1="845.8120051674676" y1="306.0592933366047" x2="801.6360832305977" y2="329.47909245201197" stroke="#6e5c30" stroke-width="2" stroke-opacity="0.85"></line><line x1="801.6360832305977" y1="329.47909245201197" x2="745.399552312714" y2="358.52681561292013" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="745.399552312714" y1="358.52681561292013" x2="718.3429674158797" y2="390.5661008031389" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="718.3429674158797" y1="390.5661008031389" x2="677.7372211050044" y2="384.89404626311693" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="677.7372211050044" y1="384.89404626311693" x2="636.1711293836642" y2="365.189738536585" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="845.8120051674676" y1="306.0592933366047" x2="762.6523624862562" y2="292.8823465228937" stroke="#c8a951" stroke-width="3" stroke-opacity="0.85"></line><line x1="762.6523624862562" y1="292.8823465228937" x2="743.3900580312092" y2="262.4691598382965" stroke="#c8a951" stroke-width="3" stroke-opacity="0.85"></line><line x1="743.3900580312092" y1="262.4691598382965" x2="692.6153572112449" y2="262.71084074771994" stroke="#c8a951" stroke-width="3" stroke-opacity="0.85"></line><line x1="692.6153572112449" y1="262.71084074771994" x2="687.7929439431695" y2="303.4262400986853" stroke="#c8a951" stroke-width="3" stroke-opacity="0.85"></line><line x1="687.7929439431695" y1="303.4262400986853" x2="644.4145868747348" y2="279.3747359041924" stroke="#c8a951" stroke-width="3" stroke-opacity="0.85"></line><line x1="845.8120051674676" y1="306.0592933366047" x2="779.2597182859756" y2="259.4085722985293" stroke="#c8a951" stroke-width="3" stroke-opacity="0.85"></line><line x1="779.2597182859756" y1="259.4085722985293" x2="763.120828953494" y2="227.228779395231" stroke="#c8a951" stroke-width="3" stroke-opacity="0.85"></line><line x1="763.120828953494" y1="227.228779395231" x2="722.1189276232354" y2="227.41865246378853" stroke="#6e5c30" stroke-width="2" stroke-opacity="0.85"></line><line x1="722.1189276232354" y1="227.41865246378853" x2="698.0452574244065" y2="194.23042734016536" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="845.8120051674676" y1="306.0592933366047" x2="799.0587453788486" y2="229.34200871871718" stroke="#6e5c30" stroke-width="2" stroke-opacity="0.85"></line><line x1="799.0587453788486" y1="229.34200871871718" x2="806.0956184540861" y2="162.38154443365272" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="806.0956184540861" y1="162.38154443365272" x2="767.8121135802163" y2="147.70600780339166" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="767.8121135802163" y1="147.70600780339166" x2="763.6602358170121" y2="106.91677911093825" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="845.8120051674676" y1="306.0592933366047" x2="818.9020780962461" y2="196.02662886601456" stroke="#6e5c30" stroke-width="2" stroke-opacity="0.85"></line><line x1="818.9020780962461" y1="196.02662886601456" x2="883.9203042817193" y2="176.38792663640058" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="883.9203042817193" y1="176.38792663640058" x2="862.6258542943499" y2="86.11057910478144" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="903.4576165818385" y1="274.0687160969751" x2="856.391650338047" y2="257.1915821072913" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="856.391650338047" y1="257.1915821072913" x2="782.9200007438662" y2="197.16218903733875" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="782.9200007438662" y1="197.16218903733875" x2="742.9297556879152" y2="186.3953842740181" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="742.9297556879152" y1="186.3953842740181" x2="726.8215510187579" y2="148.58550950654268" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="726.8215510187579" y1="148.58550950654268" x2="717.7888844673175" y2="103.47894405281653" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="903.4576165818385" y1="274.0687160969751" x2="835.0408189346074" y2="228.20640295600006" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="835.0408189346074" y1="228.20640295600006" x2="842.993566571903" y2="164.9981412371906" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="842.993566571903" y1="164.9981412371906" x2="821.768564999165" y2="124.49543111504852" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="821.768564999165" y1="124.49543111504852" x2="796.5134355960915" y2="92.19717352992683" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="796.5134355960915" y1="92.19717352992683" x2="822.7000695519248" y2="54.378395890900414" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="903.4576165818385" y1="274.0687160969751" x2="877.0107231626885" y2="227.68147263618272" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="877.0107231626885" y1="227.68147263618272" x2="905.1947147984516" y2="147.22169558270787" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="905.1947147984516" y1="147.22169558270787" x2="906.2214239327398" y2="106.23457165684984" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="906.2214239327398" y1="106.23457165684984" x2="898.7930851838028" y2="65.91312040721581" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="903.4576165818385" y1="274.0687160969751" x2="905.3510082577919" y2="205.48188234645917" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="905.3510082577919" y1="205.48188234645917" x2="975.7846393229992" y2="167.88401237251048" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="975.7846393229992" y1="167.88401237251048" x2="989.6763197964685" y2="126.99663449095513" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="989.6763197964685" y1="126.99663449095513" x2="1013.0131222048353" y2="93.28620914691751" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="903.4576165818385" y1="274.0687160969751" x2="1007.8937041162025" y2="233.04099277303428" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="1007.8937041162025" y1="233.04099277303428" x2="1028.4967795126208" y2="203.51959733424724" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="1028.4967795126208" y1="203.51959733424724" x2="1061.703073983803" y2="155.1097200914937" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="957.5059442512145" y1="308.34445797812265" x2="955.4505461749616" y2="197.59131188275416" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="955.4505461749616" y1="197.59131188275416" x2="926.4252670572993" y2="176.29506175885234" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="926.4252670572993" y1="176.29506175885234" x2="945.5630598044337" y2="140.03570066638" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="945.5630598044337" y1="140.03570066638" x2="946.5867569942967" y2="99.0485021023799" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="946.5867569942967" y1="99.0485021023799" x2="977.060759582341" y2="64.59078148175503" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="957.5059442512145" y1="308.34445797812265" x2="934.2779425458973" y2="226.91155404498673" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="934.2779425458973" y1="226.91155404498673" x2="992.6100042592836" y2="199.96557903410059" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="992.6100042592836" y1="199.96557903410059" x2="1016.6255586216657" y2="164.27582729628764" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="1016.6255586216657" y1="164.27582729628764" x2="1030.657406348366" y2="125.7517181663486" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="1030.657406348366" y1="125.7517181663486" x2="1071.5097790194711" y2="104.60737388270805" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="957.5059442512145" y1="308.34445797812265" x2="951.0571161498988" y2="258.76211787252737" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="951.0571161498988" y1="258.76211787252737" x2="1046.7710708042698" y2="234.53652667928083" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="1046.7710708042698" y1="234.53652667928083" x2="1069.5367399581687" y2="200.4377864739288" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="1069.5367399581687" y1="200.4377864739288" x2="1108.8773663181294" y2="211.98400275184488" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="957.5059442512145" y1="308.34445797812265" x2="986.8790034464357" y2="262.33877595457596" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="986.8790034464357" y1="262.33877595457596" x2="1058.6801778984595" y2="279.51618344430835" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="1058.6801778984595" y1="279.51618344430835" x2="1086.1116928779252" y2="246.082742853266" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="1086.1116928779252" y1="246.082742853266" x2="1126.8279980763402" y2="250.89755790285975" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="957.5059442512145" y1="308.34445797812265" x2="1005.2052391210232" y2="293.3250098592476" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="1005.2052391210232" y1="293.3250098592476" x2="1037.7174216022268" y2="308.783278089044" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="1037.7174216022268" y1="308.783278089044" x2="1117.4537058921017" y2="342.5424724042569" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="955.3206769331921" y1="372.30712140322464" x2="1035.0030027995224" y2="345.59187991531417" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="1035.0030027995224" y1="345.59187991531417" x2="1047.2512787339397" y2="379.44419624902827" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="1047.2512787339397" y1="379.44419624902827" x2="1088.228235257471" y2="378.06989472842423" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="1088.228235257471" y1="378.06989472842423" x2="1118.319701415973" y2="405.9177600564711" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="1118.319701415973" y1="405.9177600564711" x2="1154.5519804813568" y2="377.5384423894006" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="955.3206769331921" y1="372.30712140322464" x2="983.9881603275084" y2="413.2726574103252" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="983.9881603275084" y1="413.2726574103252" x2="1012.8375656761922" y2="434.8066132248826" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="1012.8375656761922" y1="434.8066132248826" x2="1037.3355329013582" y2="467.6828799128361" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="1037.3355329013582" y1="467.6828799128361" x2="1070.801802913751" y2="491.36849938122117" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="955.3206769331921" y1="372.30712140322464" x2="1004.813414541214" y2="365.2030555288622" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="1004.813414541214" y1="365.2030555288622" x2="1052.1533013258463" y2="420.25879837618004" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="867.5332881318133" y1="392.9735537237063" x2="949.0399598413699" y2="421.9110562397896" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="949.0399598413699" y1="421.9110562397896" x2="973.9951224519808" y2="447.85791245786925" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="973.9951224519808" y1="447.85791245786925" x2="994.0170665612126" y2="483.63669907599797" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="994.0170665612126" y1="483.63669907599797" x2="964.1272043437099" y2="512.4659315097014" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="964.1272043437099" y1="512.4659315097014" x2="1004.94461244643" y2="533.6776863068698" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="867.5332881318133" y1="392.9735537237063" x2="884.3637926774771" y2="440.05570661358075" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="884.3637926774771" y1="440.05570661358075" x2="857.8251446876835" y2="474.5040342053524" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="857.8251446876835" y1="474.5040342053524" x2="853.7479548008245" y2="515.3007934926135" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="853.7479548008245" y1="515.3007934926135" x2="798.1780526356991" y2="521.304031305825" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="867.5332881318133" y1="392.9735537237063" x2="915.5463281995393" y2="406.9286881633672" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="915.5463281995393" y1="406.9286881633672" x2="898.630589530511" y2="478.49341168101046" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="769.8858340277416" y1="409.7580422883532" x2="848.3649742185672" y2="439.76927622873995" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="848.3649742185672" y1="439.76927622873995" x2="802.1501493992138" y2="447.95508603195907" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="802.1501493992138" y1="447.95508603195907" x2="818.3593532180688" y2="485.614890487153" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="818.3593532180688" y1="485.614890487153" x2="774.6286829491264" y2="471.16213374886837" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="774.6286829491264" y1="471.16213374886837" x2="747.9702556186977" y2="508.64983525148614" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="769.8858340277416" y1="409.7580422883532" x2="782.8425538487136" y2="360.383543222133" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="782.8425538487136" y1="360.383543222133" x2="765.6433102611007" y2="328.75786455725506" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="765.6433102611007" y1="328.75786455725506" x2="698.0609011645578" y2="349.2788443120082" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="698.0609011645578" y1="349.2788443120082" x2="659.2965913070163" y2="325.4252736161049" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="769.8858340277416" y1="409.7580422883532" x2="811.5466428928722" y2="382.110767125709" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="811.5466428928722" y1="382.110767125709" x2="737.3473513462153" y2="454.1004150554296" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="901.0200063913853" y1="338.4332928375844" x2="1002.9245074962045" y2="329.2526638034129" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="1002.9245074962045" y1="329.2526638034129" x2="1017.0618189155634" y2="399.0553188425968" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="1017.0618189155634" y1="399.0553188425968" x2="920.2023683652884" y2="443.4607991203268" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="920.2023683652884" y1="443.4607991203268" x2="820.4961551545485" y2="416.98055525890544" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="820.4961551545485" y1="416.98055525890544" x2="835.1202549794675" y2="354.90266428514303" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="835.1202549794675" y1="354.90266428514303" x2="798.5220241920243" y2="289.82178395854555" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="798.5220241920243" y1="289.82178395854555" x2="820.6397197751261" y2="261.4172032404476" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="820.6397197751261" y1="261.4172032404476" x2="855.6599715787104" y2="198.6962272041279" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="855.6599715787104" y1="198.6962272041279" x2="972.0655505453699" y2="229.527796146135" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="972.0655505453699" y1="229.527796146135" x2="1026.1679957200347" y2="264.0579221783909" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="1026.1679957200347" y1="264.0579221783909" x2="1002.9245074962045" y2="329.2526638034129" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="1002.9245074962045" y1="329.2526638034129" x2="920.2023683652884" y2="443.4607991203268" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="1002.9245074962045" y1="329.2526638034129" x2="835.1202549794675" y2="354.90266428514303" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="1002.9245074962045" y1="329.2526638034129" x2="820.6397197751261" y2="261.4172032404476" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="1002.9245074962045" y1="329.2526638034129" x2="1073.0849752787583" y2="330.40099162716723" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="920.2023683652884" y1="443.4607991203268" x2="944.5840235655716" y2="476.4234146262761" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="855.6599715787104" y1="198.6962272041279" x2="867.1710506733825" y2="131.88546881849095" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="798.5220241920243" y1="289.82178395854555" x2="727.4375898741038" y2="313.8809616129056" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="1073.0849752787583" y1="330.40099162716723" x2="1107.2203029678733" y2="292.5093135048135" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="944.5840235655716" y1="476.4234146262761" x2="919.8331662132306" y2="524.877137128701" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="867.1710506733825" y1="131.88546881849095" x2="727.4375898741038" y2="313.8809616129056" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="867.5332881318133" y1="392.9735537237063" x2="1002.9245074962045" y2="329.2526638034129" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="769.8858340277416" y1="409.7580422883532" x2="1002.9245074962045" y2="329.2526638034129" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="763.6602358170121" y1="106.91677911093825" x2="782.9200007438662" y2="197.16218903733875" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="1061.703073983803" y1="155.1097200914937" x2="926.4252670572993" y2="176.29506175885234" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="1117.4537058921017" y1="342.5424724042569" x2="855.6599715787104" y2="198.6962272041279" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="1002.9245074962045" y1="329.2526638034129" x2="1047.2512787339397" y2="379.44419624902827" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="1118.319701415973" y1="405.9177600564711" x2="973.9951224519808" y2="447.85791245786925" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="853.7479548008245" y1="515.3007934926135" x2="698.0609011645578" y2="349.2788443120082" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><line x1="774.6286829491264" y1="471.16213374886837" x2="718.3429674158797" y2="390.5661008031389" stroke="#2a3045" stroke-width="2" stroke-opacity="0.85"></line><circle cx="845.8120051674676" cy="306.0592933366047" r="28" fill="#c8a951" opacity="0.12"></circle><circle cx="845.8120051674676" cy="306.0592933366047" r="25" fill="#c8a951" opacity="0.18"></circle><circle cx="845.8120051674676" cy="306.0592933366047" r="22" fill="#3a2800" stroke="#c8a951" stroke-width="3" data-node="start_marauder" style="cursor:pointer"></circle><circle cx="845.8120051674676" cy="306.0592933366047" r="12.100000000000001" fill="#33333344" pointer-events="none"></circle><text x="845.8120051674676" y="307.0592933366047" text-anchor="middle" dominant-baseline="middle" font-size="14" pointer-events="none">💪</text><circle cx="845.8120051674676" cy="306.0592933366047" r="26" fill="transparent" data-node="start_marauder" style="cursor:pointer"></circle><circle cx="801.6360832305977" cy="329.47909245201197" r="8" fill="#111820" stroke="#3a4050" stroke-width="1.5" data-node="mar_wucht_r1" style="cursor:default"></circle><circle cx="801.6360832305977" cy="329.47909245201197" r="12" fill="transparent" data-node="mar_wucht_r1" style="cursor:default"></circle><circle cx="745.399552312714" cy="358.52681561292013" r="8" fill="#111820" stroke="#3a4050" stroke-width="1.5" data-node="mar_wucht_r2" style="cursor:default"></circle><circle cx="745.399552312714" cy="358.52681561292013" r="12" fill="transparent" data-node="mar_wucht_r2" style="cursor:default"></circle><circle cx="718.3429674158797" cy="390.5661008031389" r="13" fill="#141828" stroke="#4a5868" stroke-width="2" data-node="mar_wucht_r3" style="cursor:default"></circle><circle cx="718.3429674158797" cy="390.5661008031389" r="7.15" fill="#2a3a2a44" pointer-events="none"></circle><text x="718.3429674158797" y="391.5661008031389" text-anchor="middle" dominant-baseline="middle" font-size="9" pointer-events="none">🔨</text><circle cx="718.3429674158797" cy="390.5661008031389" r="17" fill="transparent" data-node="mar_wucht_r3" style="cursor:default"></circle><circle cx="677.7372211050044" cy="384.89404626311693" r="8" fill="#111820" stroke="#3a4050" stroke-width="1.5" data-node="mar_wucht_r4" style="cursor:default"></circle><circle cx="677.7372211050044" cy="384.89404626311693" r="12" fill="transparent" data-node="mar_wucht_r4" style="cursor:default"></circle><circle cx="636.1711293836642" cy="365.189738536585" r="18" fill="#1a1020" stroke="#6a3080" stroke-width="2" data-node="mar_wucht_r5" style="cursor:default"></circle><circle cx="636.1711293836642" cy="365.189738536585" r="9.9" fill="#33113344" pointer-events="none"></circle><text x="636.1711293836642" y="366.189738536585" text-anchor="middle" dominant-baseline="middle" font-size="11" pointer-events="none">💢</text><circle cx="636.1711293836642" cy="365.189738536585" r="22" fill="transparent" data-node="mar_wucht_r5" style="cursor:default"></circle><circle cx="762.6523624862562" cy="292.8823465228937" r="14" fill="#4a8a4a" opacity="0.12"></circle><circle cx="762.6523624862562" cy="292.8823465228937" r="11" fill="#4a8a4a" opacity="0.18"></circle><circle cx="762.6523624862562" cy="292.8823465228937" r="8" fill="#1a2a1a" stroke="#4a8a4a" stroke-width="2" data-node="mar_robust_r1" style="cursor:pointer"></circle><circle cx="762.6523624862562" cy="292.8823465228937" r="12" fill="transparent" data-node="mar_robust_r1" style="cursor:pointer"></circle><circle cx="743.3900580312092" cy="262.4691598382965" r="14" fill="#4a8a4a" opacity="0.12"></circle><circle cx="743.3900580312092" cy="262.4691598382965" r="11" fill="#4a8a4a" opacity="0.18"></circle><circle cx="743.3900580312092" cy="262.4691598382965" r="8" fill="#1a2a1a" stroke="#4a8a4a" stroke-width="2" data-node="mar_robust_r2" style="cursor:pointer"></circle><circle cx="743.3900580312092" cy="262.4691598382965" r="12" fill="transparent" data-node="mar_robust_r2" style="cursor:pointer"></circle><circle cx="692.6153572112449" cy="262.71084074771994" r="19" fill="#8bc34a" opacity="0.12"></circle><circle cx="692.6153572112449" cy="262.71084074771994" r="16" fill="#8bc34a" opacity="0.18"></circle><circle cx="692.6153572112449" cy="262.71084074771994" r="13" fill="#1e2800" stroke="#8bc34a" stroke-width="2.5" data-node="mar_robust_r3" style="cursor:pointer"></circle><circle cx="692.6153572112449" cy="262.71084074771994" r="7.15" fill="#8bc34a44" pointer-events="none"></circle><text x="692.6153572112449" y="263.71084074771994" text-anchor="middle" dominant-baseline="middle" font-size="9" pointer-events="none">🛡️</text><circle cx="692.6153572112449" cy="262.71084074771994" r="17" fill="transparent" data-node="mar_robust_r3" style="cursor:pointer"></circle><circle cx="687.7929439431695" cy="303.4262400986853" r="14" fill="#4a8a4a" opacity="0.12"></circle><circle cx="687.7929439431695" cy="303.4262400986853" r="11" fill="#4a8a4a" opacity="0.18"></circle><circle cx="687.7929439431695" cy="303.4262400986853" r="8" fill="#1a2a1a" stroke="#4a8a4a" stroke-width="2" data-node="mar_robust_r4" style="cursor:pointer"></circle><circle cx="687.7929439431695" cy="303.4262400986853" r="12" fill="transparent" data-node="mar_robust_r4" style="cursor:pointer"></circle><circle cx="644.4145868747348" cy="279.3747359041924" r="24" fill="#ff8800" opacity="0.12"></circle><circle cx="644.4145868747348" cy="279.3747359041924" r="21" fill="#ff8800" opacity="0.18"></circle><circle cx="644.4145868747348" cy="279.3747359041924" r="18" fill="#2a1540" stroke="#ff8800" stroke-width="3" data-node="mar_robust_r5" style="cursor:pointer"></circle><circle cx="644.4145868747348" cy="279.3747359041924" r="9.9" fill="#ff880044" pointer-events="none"></circle><text x="644.4145868747348" y="280.3747359041924" text-anchor="middle" dominant-baseline="middle" font-size="11" pointer-events="none">🛡️</text><circle cx="644.4145868747348" cy="279.3747359041924" r="22" fill="transparent" data-node="mar_robust_r5" style="cursor:pointer"></circle><circle cx="779.2597182859756" cy="259.4085722985293" r="14" fill="#4a8a4a" opacity="0.12"></circle><circle cx="779.2597182859756" cy="259.4085722985293" r="11" fill="#4a8a4a" opacity="0.18"></circle><circle cx="779.2597182859756" cy="259.4085722985293" r="8" fill="#1a2a1a" stroke="#4a8a4a" stroke-width="2" data-node="mar_zaeh_r1" style="cursor:pointer"></circle><circle cx="779.2597182859756" cy="259.4085722985293" r="12" fill="transparent" data-node="mar_zaeh_r1" style="cursor:pointer"></circle><circle cx="763.120828953494" cy="227.228779395231" r="14" fill="#4a8a4a" opacity="0.12"></circle><circle cx="763.120828953494" cy="227.228779395231" r="11" fill="#4a8a4a" opacity="0.18"></circle><circle cx="763.120828953494" cy="227.228779395231" r="8" fill="#1a2a1a" stroke="#4a8a4a" stroke-width="2" data-node="mar_zaeh_r2" style="cursor:pointer"></circle><circle cx="763.120828953494" cy="227.228779395231" r="12" fill="transparent" data-node="mar_zaeh_r2" style="cursor:pointer"></circle><circle cx="722.1189276232354" cy="227.41865246378853" r="13" fill="#141828" stroke="#4a5868" stroke-width="2" data-node="mar_zaeh_r3" style="cursor:default"></circle><circle cx="722.1189276232354" cy="227.41865246378853" r="7.15" fill="#2a3a2a44" pointer-events="none"></circle><text x="722.1189276232354" y="228.41865246378853" text-anchor="middle" dominant-baseline="middle" font-size="9" pointer-events="none">❤️</text><circle cx="722.1189276232354" cy="227.41865246378853" r="17" fill="transparent" data-node="mar_zaeh_r3" style="cursor:default"></circle><circle cx="698.0452574244065" cy="194.23042734016536" r="8" fill="#111820" stroke="#3a4050" stroke-width="1.5" data-node="mar_zaeh_r4" style="cursor:default"></circle><circle cx="698.0452574244065" cy="194.23042734016536" r="12" fill="transparent" data-node="mar_zaeh_r4" style="cursor:default"></circle><circle cx="799.0587453788486" cy="229.34200871871718" r="8" fill="#111820" stroke="#3a4050" stroke-width="1.5" data-node="mar_wild_r1" style="cursor:default"></circle><circle cx="799.0587453788486" cy="229.34200871871718" r="12" fill="transparent" data-node="mar_wild_r1" style="cursor:default"></circle><circle cx="806.0956184540861" cy="162.38154443365272" r="8" fill="#111820" stroke="#3a4050" stroke-width="1.5" data-node="mar_wild_r2" style="cursor:default"></circle><circle cx="806.0956184540861" cy="162.38154443365272" r="12" fill="transparent" data-node="mar_wild_r2" style="cursor:default"></circle><circle cx="767.8121135802163" cy="147.70600780339166" r="13" fill="#141828" stroke="#4a5868" stroke-width="2" data-node="mar_wild_r3" style="cursor:default"></circle><circle cx="767.8121135802163" cy="147.70600780339166" r="7.15" fill="#2a3a2a44" pointer-events="none"></circle><text x="767.8121135802163" y="148.70600780339166" text-anchor="middle" dominant-baseline="middle" font-size="9" pointer-events="none">💥</text><circle cx="767.8121135802163" cy="147.70600780339166" r="17" fill="transparent" data-node="mar_wild_r3" style="cursor:default"></circle><circle cx="763.6602358170121" cy="106.91677911093825" r="8" fill="#111820" stroke="#3a4050" stroke-width="1.5" data-node="mar_wild_r4" style="cursor:default"></circle><circle cx="763.6602358170121" cy="106.91677911093825" r="12" fill="transparent" data-node="mar_wild_r4" style="cursor:default"></circle><circle cx="818.9020780962461" cy="196.02662886601456" r="8" fill="#111820" stroke="#3a4050" stroke-width="1.5" data-node="mar_krieg_r1" style="cursor:default"></circle><circle cx="818.9020780962461" cy="196.02662886601456" r="12" fill="transparent" data-node="mar_krieg_r1" style="cursor:default"></circle><circle cx="883.9203042817193" cy="176.38792663640058" r="8" fill="#111820" stroke="#3a4050" stroke-width="1.5" data-node="mar_krieg_r2" style="cursor:default"></circle><circle cx="883.9203042817193" cy="176.38792663640058" r="12" fill="transparent" data-node="mar_krieg_r2" style="cursor:default"></circle><circle cx="862.6258542943499" cy="86.11057910478144" r="13" fill="#141828" stroke="#4a5868" stroke-width="2" data-node="mar_krieg_r3" style="cursor:default"></circle><circle cx="862.6258542943499" cy="86.11057910478144" r="7.15" fill="#2a3a2a44" pointer-events="none"></circle><text x="862.6258542943499" y="87.11057910478144" text-anchor="middle" dominant-baseline="middle" font-size="9" pointer-events="none">💪</text><circle cx="862.6258542943499" cy="86.11057910478144" r="17" fill="transparent" data-node="mar_krieg_r3" style="cursor:default"></circle><circle cx="903.4576165818385" cy="274.0687160969751" r="22" fill="#1a1a2a" stroke="#c8a951" stroke-width="3" data-node="start_witch" style="cursor:default"></circle><circle cx="903.4576165818385" cy="274.0687160969751" r="12.100000000000001" fill="#33333344" pointer-events="none"></circle><text x="903.4576165818385" y="275.0687160969751" text-anchor="middle" dominant-baseline="middle" font-size="14" pointer-events="none">🧠</text><circle cx="903.4576165818385" cy="274.0687160969751" r="26" fill="transparent" data-node="start_witch" style="cursor:default"></circle><circle cx="856.391650338047" cy="257.1915821072913" r="8" fill="#111820" stroke="#3a4050" stroke-width="1.5" data-node="wit_elem_r1" style="cursor:default"></circle><circle cx="856.391650338047" cy="257.1915821072913" r="12" fill="transparent" data-node="wit_elem_r1" style="cursor:default"></circle><circle cx="782.9200007438662" cy="197.16218903733875" r="8" fill="#111820" stroke="#3a4050" stroke-width="1.5" data-node="wit_elem_r2" style="cursor:default"></circle><circle cx="782.9200007438662" cy="197.16218903733875" r="12" fill="transparent" data-node="wit_elem_r2" style="cursor:default"></circle><circle cx="742.9297556879152" cy="186.3953842740181" r="13" fill="#141828" stroke="#4a5868" stroke-width="2" data-node="wit_elem_r3" style="cursor:default"></circle><circle cx="742.9297556879152" cy="186.3953842740181" r="7.15" fill="#2a3a2a44" pointer-events="none"></circle><text x="742.9297556879152" y="187.3953842740181" text-anchor="middle" dominant-baseline="middle" font-size="9" pointer-events="none">🔥</text><circle cx="742.9297556879152" cy="186.3953842740181" r="17" fill="transparent" data-node="wit_elem_r3" style="cursor:default"></circle><circle cx="726.8215510187579" cy="148.58550950654268" r="8" fill="#111820" stroke="#3a4050" stroke-width="1.5" data-node="wit_elem_r4" style="cursor:default"></circle><circle cx="726.8215510187579" cy="148.58550950654268" r="12" fill="transparent" data-node="wit_elem_r4" style="cursor:default"></circle><circle cx="717.7888844673175" cy="103.47894405281653" r="18" fill="#1a1020" stroke="#6a3080" stroke-width="2" data-node="wit_elem_r5" style="cursor:default"></circle><circle cx="717.7888844673175" cy="103.47894405281653" r="9.9" fill="#33113344" pointer-events="none"></circle><text x="717.7888844673175" y="104.47894405281653" text-anchor="middle" dominant-baseline="middle" font-size="11" pointer-events="none">🔥</text><circle cx="717.7888844673175" cy="103.47894405281653" r="22" fill="transparent" data-node="wit_elem_r5" style="cursor:default"></circle><circle cx="835.0408189346074" cy="228.20640295600006" r="8" fill="#111820" stroke="#3a4050" stroke-width="1.5" data-node="wit_mana_r1" style="cursor:default"></circle><circle cx="835.0408189346074" cy="228.20640295600006" r="12" fill="transparent" data-node="wit_mana_r1" style="cursor:default"></circle><circle cx="842.993566571903" cy="164.9981412371906" r="8" fill="#111820" stroke="#3a4050" stroke-width="1.5" data-node="wit_mana_r2" style="cursor:default"></circle><circle cx="842.993566571903" cy="164.9981412371906" r="12" fill="transparent" data-node="wit_mana_r2" style="cursor:default"></circle><circle cx="821.768564999165" cy="124.49543111504852" r="13" fill="#141828" stroke="#4a5868" stroke-width="2" data-node="wit_mana_r3" style="cursor:default"></circle><circle cx="821.768564999165" cy="124.49543111504852" r="7.15" fill="#2a3a2a44" pointer-events="none"></circle><text x="821.768564999165" y="125.49543111504852" text-anchor="middle" dominant-baseline="middle" font-size="9" pointer-events="none">💙</text><circle cx="821.768564999165" cy="124.49543111504852" r="17" fill="transparent" data-node="wit_mana_r3" style="cursor:default"></circle><circle cx="796.5134355960915" cy="92.19717352992683" r="8" fill="#111820" stroke="#3a4050" stroke-width="1.5" data-node="wit_mana_r4" style="cursor:default"></circle><circle cx="796.5134355960915" cy="92.19717352992683" r="12" fill="transparent" data-node="wit_mana_r4" style="cursor:default"></circle><circle cx="822.7000695519248" cy="54.378395890900414" r="18" fill="#1a1020" stroke="#6a3080" stroke-width="2" data-node="wit_mana_r5" style="cursor:default"></circle><circle cx="822.7000695519248" cy="54.378395890900414" r="9.9" fill="#33113344" pointer-events="none"></circle><text x="822.7000695519248" y="55.378395890900414" text-anchor="middle" dominant-baseline="middle" font-size="11" pointer-events="none">💡</text><circle cx="822.7000695519248" cy="54.378395890900414" r="22" fill="transparent" data-node="wit_mana_r5" style="cursor:default"></circle><circle cx="877.0107231626885" cy="227.68147263618272" r="8" fill="#111820" stroke="#3a4050" stroke-width="1.5" data-node="wit_geist_r1" style="cursor:default"></circle><circle cx="877.0107231626885" cy="227.68147263618272" r="12" fill="transparent" data-node="wit_geist_r1" style="cursor:default"></circle><circle cx="905.1947147984516" cy="147.22169558270787" r="8" fill="#111820" stroke="#3a4050" stroke-width="1.5" data-node="wit_geist_r2" style="cursor:default"></circle><circle cx="905.1947147984516" cy="147.22169558270787" r="12" fill="transparent" data-node="wit_geist_r2" style="cursor:default"></circle><circle cx="906.2214239327398" cy="106.23457165684984" r="13" fill="#141828" stroke="#4a5868" stroke-width="2" data-node="wit_geist_r3" style="cursor:default"></circle><circle cx="906.2214239327398" cy="106.23457165684984" r="7.15" fill="#2a3a2a44" pointer-events="none"></circle><text x="906.2214239327398" y="107.23457165684984" text-anchor="middle" dominant-baseline="middle" font-size="9" pointer-events="none">💥</text><circle cx="906.2214239327398" cy="106.23457165684984" r="17" fill="transparent" data-node="wit_geist_r3" style="cursor:default"></circle><circle cx="898.7930851838028" cy="65.91312040721581" r="8" fill="#111820" stroke="#3a4050" stroke-width="1.5" data-node="wit_geist_r4" style="cursor:default"></circle><circle cx="898.7930851838028" cy="65.91312040721581" r="12" fill="transparent" data-node="wit_geist_r4" style="cursor:default"></circle><circle cx="905.3510082577919" cy="205.48188234645917" r="8" fill="#111820" stroke="#3a4050" stroke-width="1.5" data-node="wit_diener_r1" style="cursor:default"></circle><circle cx="905.3510082577919" cy="205.48188234645917" r="12" fill="transparent" data-node="wit_diener_r1" style="cursor:default"></circle><circle cx="975.7846393229992" cy="167.88401237251048" r="8" fill="#111820" stroke="#3a4050" stroke-width="1.5" data-node="wit_diener_r2" style="cursor:default"></circle><circle cx="975.7846393229992" cy="167.88401237251048" r="12" fill="transparent" data-node="wit_diener_r2" style="cursor:default"></circle><circle cx="989.6763197964685" cy="126.99663449095513" r="13" fill="#141828" stroke="#4a5868" stroke-width="2" data-node="wit_diener_r3" style="cursor:default"></circle><circle cx="989.6763197964685" cy="126.99663449095513" r="7.15" fill="#2a3a2a44" pointer-events="none"></circle><text x="989.6763197964685" y="127.99663449095513" text-anchor="middle" dominant-baseline="middle" font-size="9" pointer-events="none">💀</text><circle cx="989.6763197964685" cy="126.99663449095513" r="17" fill="transparent" data-node="wit_diener_r3" style="cursor:default"></circle><circle cx="1013.0131222048353" cy="93.28620914691751" r="8" fill="#111820" stroke="#3a4050" stroke-width="1.5" data-node="wit_diener_r4" style="cursor:default"></circle><circle cx="1013.0131222048353" cy="93.28620914691751" r="12" fill="transparent" data-node="wit_diener_r4" style="cursor:default"></circle><circle cx="1007.8937041162025" cy="233.04099277303428" r="8" fill="#111820" stroke="#3a4050" stroke-width="1.5" data-node="wit_frost_r1" style="cursor:default"></circle><circle cx="1007.8937041162025" cy="233.04099277303428" r="12" fill="transparent" data-node="wit_frost_r1" style="cursor:default"></circle><circle cx="1028.4967795126208" cy="203.51959733424724" r="8" fill="#111820" stroke="#3a4050" stroke-width="1.5" data-node="wit_frost_r2" style="cursor:default"></circle><circle cx="1028.4967795126208" cy="203.51959733424724" r="12" fill="transparent" data-node="wit_frost_r2" style="cursor:default"></circle><circle cx="1061.703073983803" cy="155.1097200914937" r="13" fill="#141828" stroke="#4a5868" stroke-width="2" data-node="wit_frost_r3" style="cursor:default"></circle><circle cx="1061.703073983803" cy="155.1097200914937" r="7.15" fill="#2a3a2a44" pointer-events="none"></circle><text x="1061.703073983803" y="156.1097200914937" text-anchor="middle" dominant-baseline="middle" font-size="9" pointer-events="none">❄️</text><circle cx="1061.703073983803" cy="155.1097200914937" r="17" fill="transparent" data-node="wit_frost_r3" style="cursor:default"></circle><circle cx="957.5059442512145" cy="308.34445797812265" r="22" fill="#1a1a2a" stroke="#c8a951" stroke-width="3" data-node="start_ranger" style="cursor:default"></circle><circle cx="957.5059442512145" cy="308.34445797812265" r="12.100000000000001" fill="#33333344" pointer-events="none"></circle><text x="957.5059442512145" y="309.34445797812265" text-anchor="middle" dominant-baseline="middle" font-size="14" pointer-events="none">🏹</text><circle cx="957.5059442512145" cy="308.34445797812265" r="26" fill="transparent" data-node="start_ranger" style="cursor:default"></circle><circle cx="955.4505461749616" cy="197.59131188275416" r="8" fill="#111820" stroke="#3a4050" stroke-width="1.5" data-node="ran_praez_r1" style="cursor:default"></circle><circle cx="955.4505461749616" cy="197.59131188275416" r="12" fill="transparent" data-node="ran_praez_r1" style="cursor:default"></circle><circle cx="926.4252670572993" cy="176.29506175885234" r="8" fill="#111820" stroke="#3a4050" stroke-width="1.5" data-node="ran_praez_r2" style="cursor:default"></circle><circle cx="926.4252670572993" cy="176.29506175885234" r="12" fill="transparent" data-node="ran_praez_r2" style="cursor:default"></circle><circle cx="945.5630598044337" cy="140.03570066638" r="13" fill="#141828" stroke="#4a5868" stroke-width="2" data-node="ran_praez_r3" style="cursor:default"></circle><circle cx="945.5630598044337" cy="140.03570066638" r="7.15" fill="#2a3a2a44" pointer-events="none"></circle><text x="945.5630598044337" y="141.03570066638" text-anchor="middle" dominant-baseline="middle" font-size="9" pointer-events="none">🎯</text><circle cx="945.5630598044337" cy="140.03570066638" r="17" fill="transparent" data-node="ran_praez_r3" style="cursor:default"></circle><circle cx="946.5867569942967" cy="99.0485021023799" r="8" fill="#111820" stroke="#3a4050" stroke-width="1.5" data-node="ran_praez_r4" style="cursor:default"></circle><circle cx="946.5867569942967" cy="99.0485021023799" r="12" fill="transparent" data-node="ran_praez_r4" style="cursor:default"></circle><circle cx="977.060759582341" cy="64.59078148175503" r="18" fill="#1a1020" stroke="#6a3080" stroke-width="2" data-node="ran_praez_r5" style="cursor:default"></circle><circle cx="977.060759582341" cy="64.59078148175503" r="9.9" fill="#33113344" pointer-events="none"></circle><text x="977.060759582341" y="65.59078148175503" text-anchor="middle" dominant-baseline="middle" font-size="11" pointer-events="none">🎯</text><circle cx="977.060759582341" cy="64.59078148175503" r="22" fill="transparent" data-node="ran_praez_r5" style="cursor:default"></circle><circle cx="934.2779425458973" cy="226.91155404498673" r="8" fill="#111820" stroke="#3a4050" stroke-width="1.5" data-node="ran_wendig_r1" style="cursor:default"></circle><circle cx="934.2779425458973" cy="226.91155404498673" r="12" fill="transparent" data-node="ran_wendig_r1" style="cursor:default"></circle><circle cx="992.6100042592836" cy="199.96557903410059" r="8" fill="#111820" stroke="#3a4050" stroke-width="1.5" data-node="ran_wendig_r2" style="cursor:default"></circle><circle cx="992.6100042592836" cy="199.96557903410059" r="12" fill="transparent" data-node="ran_wendig_r2" style="cursor:default"></circle><circle cx="1016.6255586216657" cy="164.27582729628764" r="13" fill="#141828" stroke="#4a5868" stroke-width="2" data-node="ran_wendig_r3" style="cursor:default"></circle><circle cx="1016.6255586216657" cy="164.27582729628764" r="7.15" fill="#2a3a2a44" pointer-events="none"></circle><text x="1016.6255586216657" y="165.27582729628764" text-anchor="middle" dominant-baseline="middle" font-size="9" pointer-events="none">🏃</text><circle cx="1016.6255586216657" cy="164.27582729628764" r="17" fill="transparent" data-node="ran_wendig_r3" style="cursor:default"></circle><circle cx="1030.657406348366" cy="125.7517181663486" r="8" fill="#111820" stroke="#3a4050" stroke-width="1.5" data-node="ran_wendig_r4" style="cursor:default"></circle><circle cx="1030.657406348366" cy="125.7517181663486" r="12" fill="transparent" data-node="ran_wendig_r4" style="cursor:default"></circle><circle cx="1071.5097790194711" cy="104.60737388270805" r="18" fill="#1a1020" stroke="#6a3080" stroke-width="2" data-node="ran_wendig_r5" style="cursor:default"></circle><circle cx="1071.5097790194711" cy="104.60737388270805" r="9.9" fill="#33113344" pointer-events="none"></circle><text x="1071.5097790194711" y="105.60737388270805" text-anchor="middle" dominant-baseline="middle" font-size="11" pointer-events="none">🏃</text><circle cx="1071.5097790194711" cy="104.60737388270805" r="22" fill="transparent" data-node="ran_wendig_r5" style="cursor:default"></circle><circle cx="951.0571161498988" cy="258.76211787252737" r="8" fill="#111820" stroke="#3a4050" stroke-width="1.5" data-node="ran_tanz_r1" style="cursor:default"></circle><circle cx="951.0571161498988" cy="258.76211787252737" r="12" fill="transparent" data-node="ran_tanz_r1" style="cursor:default"></circle><circle cx="1046.7710708042698" cy="234.53652667928083" r="8" fill="#111820" stroke="#3a4050" stroke-width="1.5" data-node="ran_tanz_r2" style="cursor:default"></circle><circle cx="1046.7710708042698" cy="234.53652667928083" r="12" fill="transparent" data-node="ran_tanz_r2" style="cursor:default"></circle><circle cx="1069.5367399581687" cy="200.4377864739288" r="13" fill="#141828" stroke="#4a5868" stroke-width="2" data-node="ran_tanz_r3" style="cursor:default"></circle><circle cx="1069.5367399581687" cy="200.4377864739288" r="7.15" fill="#2a3a2a44" pointer-events="none"></circle><text x="1069.5367399581687" y="201.4377864739288" text-anchor="middle" dominant-baseline="middle" font-size="9" pointer-events="none">🌪️</text><circle cx="1069.5367399581687" cy="200.4377864739288" r="17" fill="transparent" data-node="ran_tanz_r3" style="cursor:default"></circle><circle cx="1108.8773663181294" cy="211.98400275184488" r="8" fill="#111820" stroke="#3a4050" stroke-width="1.5" data-node="ran_tanz_r4" style="cursor:default"></circle><circle cx="1108.8773663181294" cy="211.98400275184488" r="12" fill="transparent" data-node="ran_tanz_r4" style="cursor:default"></circle><circle cx="986.8790034464357" cy="262.33877595457596" r="8" fill="#111820" stroke="#3a4050" stroke-width="1.5" data-node="ran_fallen_r1" style="cursor:default"></circle><circle cx="986.8790034464357" cy="262.33877595457596" r="12" fill="transparent" data-node="ran_fallen_r1" style="cursor:default"></circle><circle cx="1058.6801778984595" cy="279.51618344430835" r="8" fill="#111820" stroke="#3a4050" stroke-width="1.5" data-node="ran_fallen_r2" style="cursor:default"></circle><circle cx="1058.6801778984595" cy="279.51618344430835" r="12" fill="transparent" data-node="ran_fallen_r2" style="cursor:default"></circle><circle cx="1086.1116928779252" cy="246.082742853266" r="13" fill="#141828" stroke="#4a5868" stroke-width="2" data-node="ran_fallen_r3" style="cursor:default"></circle><circle cx="1086.1116928779252" cy="246.082742853266" r="7.15" fill="#2a3a2a44" pointer-events="none"></circle><text x="1086.1116928779252" y="247.082742853266" text-anchor="middle" dominant-baseline="middle" font-size="9" pointer-events="none">💜</text><circle cx="1086.1116928779252" cy="246.082742853266" r="17" fill="transparent" data-node="ran_fallen_r3" style="cursor:default"></circle><circle cx="1126.8279980763402" cy="250.89755790285975" r="8" fill="#111820" stroke="#3a4050" stroke-width="1.5" data-node="ran_fallen_r4" style="cursor:default"></circle><circle cx="1126.8279980763402" cy="250.89755790285975" r="12" fill="transparent" data-node="ran_fallen_r4" style="cursor:default"></circle><circle cx="1005.2052391210232" cy="293.3250098592476" r="8" fill="#111820" stroke="#3a4050" stroke-width="1.5" data-node="ran_adler_r1" style="cursor:default"></circle><circle cx="1005.2052391210232" cy="293.3250098592476" r="12" fill="transparent" data-node="ran_adler_r1" style="cursor:default"></circle><circle cx="1037.7174216022268" cy="308.783278089044" r="8" fill="#111820" stroke="#3a4050" stroke-width="1.5" data-node="ran_adler_r2" style="cursor:default"></circle><circle cx="1037.7174216022268" cy="308.783278089044" r="12" fill="transparent" data-node="ran_adler_r2" style="cursor:default"></circle><circle cx="1117.4537058921017" cy="342.5424724042569" r="13" fill="#141828" stroke="#4a5868" stroke-width="2" data-node="ran_adler_r3" style="cursor:default"></circle><circle cx="1117.4537058921017" cy="342.5424724042569" r="7.15" fill="#2a3a2a44" pointer-events="none"></circle><text x="1117.4537058921017" y="343.5424724042569" text-anchor="middle" dominant-baseline="middle" font-size="9" pointer-events="none">🏹</text><circle cx="1117.4537058921017" cy="342.5424724042569" r="17" fill="transparent" data-node="ran_adler_r3" style="cursor:default"></circle><circle cx="955.3206769331921" cy="372.30712140322464" r="22" fill="#1a1a2a" stroke="#c8a951" stroke-width="3" data-node="start_shadow" style="cursor:default"></circle><circle cx="955.3206769331921" cy="372.30712140322464" r="12.100000000000001" fill="#33333344" pointer-events="none"></circle><text x="955.3206769331921" y="373.30712140322464" text-anchor="middle" dominant-baseline="middle" font-size="14" pointer-events="none">🎭</text><circle cx="955.3206769331921" cy="372.30712140322464" r="26" fill="transparent" data-node="start_shadow" style="cursor:default"></circle><circle cx="1035.0030027995224" cy="345.59187991531417" r="8" fill="#111820" stroke="#3a4050" stroke-width="1.5" data-node="sha_meuch_r1" style="cursor:default"></circle><circle cx="1035.0030027995224" cy="345.59187991531417" r="12" fill="transparent" data-node="sha_meuch_r1" style="cursor:default"></circle><circle cx="1047.2512787339397" cy="379.44419624902827" r="8" fill="#111820" stroke="#3a4050" stroke-width="1.5" data-node="sha_meuch_r2" style="cursor:default"></circle><circle cx="1047.2512787339397" cy="379.44419624902827" r="12" fill="transparent" data-node="sha_meuch_r2" style="cursor:default"></circle><circle cx="1088.228235257471" cy="378.06989472842423" r="13" fill="#141828" stroke="#4a5868" stroke-width="2" data-node="sha_meuch_r3" style="cursor:default"></circle><circle cx="1088.228235257471" cy="378.06989472842423" r="7.15" fill="#2a3a2a44" pointer-events="none"></circle><text x="1088.228235257471" y="379.06989472842423" text-anchor="middle" dominant-baseline="middle" font-size="9" pointer-events="none">🗡️</text><circle cx="1088.228235257471" cy="378.06989472842423" r="17" fill="transparent" data-node="sha_meuch_r3" style="cursor:default"></circle><circle cx="1118.319701415973" cy="405.9177600564711" r="8" fill="#111820" stroke="#3a4050" stroke-width="1.5" data-node="sha_meuch_r4" style="cursor:default"></circle><circle cx="1118.319701415973" cy="405.9177600564711" r="12" fill="transparent" data-node="sha_meuch_r4" style="cursor:default"></circle><circle cx="1154.5519804813568" cy="377.5384423894006" r="18" fill="#1a1020" stroke="#6a3080" stroke-width="2" data-node="sha_meuch_r5" style="cursor:default"></circle><circle cx="1154.5519804813568" cy="377.5384423894006" r="9.9" fill="#33113344" pointer-events="none"></circle><text x="1154.5519804813568" y="378.5384423894006" text-anchor="middle" dominant-baseline="middle" font-size="11" pointer-events="none">🗡️</text><circle cx="1154.5519804813568" cy="377.5384423894006" r="22" fill="transparent" data-node="sha_meuch_r5" style="cursor:default"></circle><circle cx="983.9881603275084" cy="413.2726574103252" r="8" fill="#111820" stroke="#3a4050" stroke-width="1.5" data-node="sha_gift_r1" style="cursor:default"></circle><circle cx="983.9881603275084" cy="413.2726574103252" r="12" fill="transparent" data-node="sha_gift_r1" style="cursor:default"></circle><circle cx="1012.8375656761922" cy="434.8066132248826" r="8" fill="#111820" stroke="#3a4050" stroke-width="1.5" data-node="sha_gift_r2" style="cursor:default"></circle><circle cx="1012.8375656761922" cy="434.8066132248826" r="12" fill="transparent" data-node="sha_gift_r2" style="cursor:default"></circle><circle cx="1037.3355329013582" cy="467.6828799128361" r="13" fill="#141828" stroke="#4a5868" stroke-width="2" data-node="sha_gift_r3" style="cursor:default"></circle><circle cx="1037.3355329013582" cy="467.6828799128361" r="7.15" fill="#2a3a2a44" pointer-events="none"></circle><text x="1037.3355329013582" y="468.6828799128361" text-anchor="middle" dominant-baseline="middle" font-size="9" pointer-events="none">💜</text><circle cx="1037.3355329013582" cy="467.6828799128361" r="17" fill="transparent" data-node="sha_gift_r3" style="cursor:default"></circle><circle cx="1070.801802913751" cy="491.36849938122117" r="8" fill="#111820" stroke="#3a4050" stroke-width="1.5" data-node="sha_gift_r4" style="cursor:default"></circle><circle cx="1070.801802913751" cy="491.36849938122117" r="12" fill="transparent" data-node="sha_gift_r4" style="cursor:default"></circle><circle cx="1004.813414541214" cy="365.2030555288622" r="8" fill="#111820" stroke="#3a4050" stroke-width="1.5" data-node="sha_doppel_r1" style="cursor:default"></circle><circle cx="1004.813414541214" cy="365.2030555288622" r="12" fill="transparent" data-node="sha_doppel_r1" style="cursor:default"></circle><circle cx="1052.1533013258463" cy="420.25879837618004" r="13" fill="#141828" stroke="#4a5868" stroke-width="2" data-node="sha_doppel_r2" style="cursor:default"></circle><circle cx="1052.1533013258463" cy="420.25879837618004" r="7.15" fill="#2a3a2a44" pointer-events="none"></circle><text x="1052.1533013258463" y="421.25879837618004" text-anchor="middle" dominant-baseline="middle" font-size="9" pointer-events="none">🎭</text><circle cx="1052.1533013258463" cy="420.25879837618004" r="17" fill="transparent" data-node="sha_doppel_r2" style="cursor:default"></circle><circle cx="867.5332881318133" cy="392.9735537237063" r="22" fill="#1a1a2a" stroke="#c8a951" stroke-width="3" data-node="start_templar" style="cursor:default"></circle><circle cx="867.5332881318133" cy="392.9735537237063" r="12.100000000000001" fill="#33333344" pointer-events="none"></circle><text x="867.5332881318133" y="393.9735537237063" text-anchor="middle" dominant-baseline="middle" font-size="14" pointer-events="none">⚔️</text><circle cx="867.5332881318133" cy="392.9735537237063" r="26" fill="transparent" data-node="start_templar" style="cursor:default"></circle><circle cx="949.0399598413699" cy="421.9110562397896" r="8" fill="#111820" stroke="#3a4050" stroke-width="1.5" data-node="tem_priest_r1" style="cursor:default"></circle><circle cx="949.0399598413699" cy="421.9110562397896" r="12" fill="transparent" data-node="tem_priest_r1" style="cursor:default"></circle><circle cx="973.9951224519808" cy="447.85791245786925" r="8" fill="#111820" stroke="#3a4050" stroke-width="1.5" data-node="tem_priest_r2" style="cursor:default"></circle><circle cx="973.9951224519808" cy="447.85791245786925" r="12" fill="transparent" data-node="tem_priest_r2" style="cursor:default"></circle><circle cx="994.0170665612126" cy="483.63669907599797" r="13" fill="#141828" stroke="#4a5868" stroke-width="2" data-node="tem_priest_r3" style="cursor:default"></circle><circle cx="994.0170665612126" cy="483.63669907599797" r="7.15" fill="#2a3a2a44" pointer-events="none"></circle><text x="994.0170665612126" y="484.63669907599797" text-anchor="middle" dominant-baseline="middle" font-size="9" pointer-events="none">⚔️</text><circle cx="994.0170665612126" cy="483.63669907599797" r="17" fill="transparent" data-node="tem_priest_r3" style="cursor:default"></circle><circle cx="964.1272043437099" cy="512.4659315097014" r="8" fill="#111820" stroke="#3a4050" stroke-width="1.5" data-node="tem_priest_r4" style="cursor:default"></circle><circle cx="964.1272043437099" cy="512.4659315097014" r="12" fill="transparent" data-node="tem_priest_r4" style="cursor:default"></circle><circle cx="1004.94461244643" cy="533.6776863068698" r="18" fill="#1a1020" stroke="#6a3080" stroke-width="2" data-node="tem_priest_r5" style="cursor:default"></circle><circle cx="1004.94461244643" cy="533.6776863068698" r="9.9" fill="#33113344" pointer-events="none"></circle><text x="1004.94461244643" y="534.6776863068698" text-anchor="middle" dominant-baseline="middle" font-size="11" pointer-events="none">🔥</text><circle cx="1004.94461244643" cy="533.6776863068698" r="22" fill="transparent" data-node="tem_priest_r5" style="cursor:default"></circle><circle cx="884.3637926774771" cy="440.05570661358075" r="8" fill="#111820" stroke="#3a4050" stroke-width="1.5" data-node="tem_stand_r1" style="cursor:default"></circle><circle cx="884.3637926774771" cy="440.05570661358075" r="12" fill="transparent" data-node="tem_stand_r1" style="cursor:default"></circle><circle cx="857.8251446876835" cy="474.5040342053524" r="8" fill="#111820" stroke="#3a4050" stroke-width="1.5" data-node="tem_stand_r2" style="cursor:default"></circle><circle cx="857.8251446876835" cy="474.5040342053524" r="12" fill="transparent" data-node="tem_stand_r2" style="cursor:default"></circle><circle cx="853.7479548008245" cy="515.3007934926135" r="13" fill="#141828" stroke="#4a5868" stroke-width="2" data-node="tem_stand_r3" style="cursor:default"></circle><circle cx="853.7479548008245" cy="515.3007934926135" r="7.15" fill="#2a3a2a44" pointer-events="none"></circle><text x="853.7479548008245" y="516.3007934926135" text-anchor="middle" dominant-baseline="middle" font-size="9" pointer-events="none">✨</text><circle cx="853.7479548008245" cy="515.3007934926135" r="17" fill="transparent" data-node="tem_stand_r3" style="cursor:default"></circle><circle cx="798.1780526356991" cy="521.304031305825" r="8" fill="#111820" stroke="#3a4050" stroke-width="1.5" data-node="tem_stand_r4" style="cursor:default"></circle><circle cx="798.1780526356991" cy="521.304031305825" r="12" fill="transparent" data-node="tem_stand_r4" style="cursor:default"></circle><circle cx="915.5463281995393" cy="406.9286881633672" r="8" fill="#111820" stroke="#3a4050" stroke-width="1.5" data-node="tem_wacht_r1" style="cursor:default"></circle><circle cx="915.5463281995393" cy="406.9286881633672" r="12" fill="transparent" data-node="tem_wacht_r1" style="cursor:default"></circle><circle cx="898.630589530511" cy="478.49341168101046" r="13" fill="#141828" stroke="#4a5868" stroke-width="2" data-node="tem_wacht_r2" style="cursor:default"></circle><circle cx="898.630589530511" cy="478.49341168101046" r="7.15" fill="#2a3a2a44" pointer-events="none"></circle><text x="898.630589530511" y="479.49341168101046" text-anchor="middle" dominant-baseline="middle" font-size="9" pointer-events="none">🛡️</text><circle cx="898.630589530511" cy="478.49341168101046" r="17" fill="transparent" data-node="tem_wacht_r2" style="cursor:default"></circle><circle cx="769.8858340277416" cy="409.7580422883532" r="22" fill="#1a1a2a" stroke="#c8a951" stroke-width="3" data-node="start_duelist" style="cursor:default"></circle><circle cx="769.8858340277416" cy="409.7580422883532" r="12.100000000000001" fill="#33333344" pointer-events="none"></circle><text x="769.8858340277416" y="410.7580422883532" text-anchor="middle" dominant-baseline="middle" font-size="14" pointer-events="none">⚔️</text><circle cx="769.8858340277416" cy="409.7580422883532" r="26" fill="transparent" data-node="start_duelist" style="cursor:default"></circle><circle cx="848.3649742185672" cy="439.76927622873995" r="8" fill="#111820" stroke="#3a4050" stroke-width="1.5" data-node="due_tanz_r1" style="cursor:default"></circle><circle cx="848.3649742185672" cy="439.76927622873995" r="12" fill="transparent" data-node="due_tanz_r1" style="cursor:default"></circle><circle cx="802.1501493992138" cy="447.95508603195907" r="8" fill="#111820" stroke="#3a4050" stroke-width="1.5" data-node="due_tanz_r2" style="cursor:default"></circle><circle cx="802.1501493992138" cy="447.95508603195907" r="12" fill="transparent" data-node="due_tanz_r2" style="cursor:default"></circle><circle cx="818.3593532180688" cy="485.614890487153" r="13" fill="#141828" stroke="#4a5868" stroke-width="2" data-node="due_tanz_r3" style="cursor:default"></circle><circle cx="818.3593532180688" cy="485.614890487153" r="7.15" fill="#2a3a2a44" pointer-events="none"></circle><text x="818.3593532180688" y="486.614890487153" text-anchor="middle" dominant-baseline="middle" font-size="9" pointer-events="none">🗡️</text><circle cx="818.3593532180688" cy="485.614890487153" r="17" fill="transparent" data-node="due_tanz_r3" style="cursor:default"></circle><circle cx="774.6286829491264" cy="471.16213374886837" r="8" fill="#111820" stroke="#3a4050" stroke-width="1.5" data-node="due_tanz_r4" style="cursor:default"></circle><circle cx="774.6286829491264" cy="471.16213374886837" r="12" fill="transparent" data-node="due_tanz_r4" style="cursor:default"></circle><circle cx="747.9702556186977" cy="508.64983525148614" r="18" fill="#1a1020" stroke="#6a3080" stroke-width="2" data-node="due_tanz_r5" style="cursor:default"></circle><circle cx="747.9702556186977" cy="508.64983525148614" r="9.9" fill="#33113344" pointer-events="none"></circle><text x="747.9702556186977" y="509.64983525148614" text-anchor="middle" dominant-baseline="middle" font-size="11" pointer-events="none">🩸</text><circle cx="747.9702556186977" cy="508.64983525148614" r="22" fill="transparent" data-node="due_tanz_r5" style="cursor:default"></circle><circle cx="782.8425538487136" cy="360.383543222133" r="8" fill="#111820" stroke="#3a4050" stroke-width="1.5" data-node="due_kampf_r1" style="cursor:default"></circle><circle cx="782.8425538487136" cy="360.383543222133" r="12" fill="transparent" data-node="due_kampf_r1" style="cursor:default"></circle><circle cx="765.6433102611007" cy="328.75786455725506" r="8" fill="#111820" stroke="#3a4050" stroke-width="1.5" data-node="due_kampf_r2" style="cursor:default"></circle><circle cx="765.6433102611007" cy="328.75786455725506" r="12" fill="transparent" data-node="due_kampf_r2" style="cursor:default"></circle><circle cx="698.0609011645578" cy="349.2788443120082" r="13" fill="#141828" stroke="#4a5868" stroke-width="2" data-node="due_kampf_r3" style="cursor:default"></circle><circle cx="698.0609011645578" cy="349.2788443120082" r="7.15" fill="#2a3a2a44" pointer-events="none"></circle><text x="698.0609011645578" y="350.2788443120082" text-anchor="middle" dominant-baseline="middle" font-size="9" pointer-events="none">🛡️</text><circle cx="698.0609011645578" cy="349.2788443120082" r="17" fill="transparent" data-node="due_kampf_r3" style="cursor:default"></circle><circle cx="659.2965913070163" cy="325.4252736161049" r="8" fill="#111820" stroke="#3a4050" stroke-width="1.5" data-node="due_kampf_r4" style="cursor:default"></circle><circle cx="659.2965913070163" cy="325.4252736161049" r="12" fill="transparent" data-node="due_kampf_r4" style="cursor:default"></circle><circle cx="811.5466428928722" cy="382.110767125709" r="8" fill="#111820" stroke="#3a4050" stroke-width="1.5" data-node="due_glad_r1" style="cursor:default"></circle><circle cx="811.5466428928722" cy="382.110767125709" r="12" fill="transparent" data-node="due_glad_r1" style="cursor:default"></circle><circle cx="737.3473513462153" cy="454.1004150554296" r="13" fill="#141828" stroke="#4a5868" stroke-width="2" data-node="due_glad_r2" style="cursor:default"></circle><circle cx="737.3473513462153" cy="454.1004150554296" r="7.15" fill="#2a3a2a44" pointer-events="none"></circle><text x="737.3473513462153" y="455.1004150554296" text-anchor="middle" dominant-baseline="middle" font-size="9" pointer-events="none">⚔️</text><circle cx="737.3473513462153" cy="454.1004150554296" r="17" fill="transparent" data-node="due_glad_r2" style="cursor:default"></circle><circle cx="901.0200063913853" cy="338.4332928375844" r="22" fill="#1a1a2a" stroke="#c8a951" stroke-width="3" data-node="start_scion" style="cursor:default"></circle><circle cx="901.0200063913853" cy="338.4332928375844" r="12.100000000000001" fill="#33333344" pointer-events="none"></circle><text x="901.0200063913853" y="339.4332928375844" text-anchor="middle" dominant-baseline="middle" font-size="14" pointer-events="none">👑</text><circle cx="901.0200063913853" cy="338.4332928375844" r="26" fill="transparent" data-node="start_scion" style="cursor:default"></circle><circle cx="1002.9245074962045" cy="329.2526638034129" r="8" fill="#111820" stroke="#3a4050" stroke-width="1.5" data-node="hub_h1" style="cursor:default"></circle><circle cx="1002.9245074962045" cy="329.2526638034129" r="12" fill="transparent" data-node="hub_h1" style="cursor:default"></circle><circle cx="1017.0618189155634" cy="399.0553188425968" r="8" fill="#111820" stroke="#3a4050" stroke-width="1.5" data-node="hub_h2" style="cursor:default"></circle><circle cx="1017.0618189155634" cy="399.0553188425968" r="12" fill="transparent" data-node="hub_h2" style="cursor:default"></circle><circle cx="920.2023683652884" cy="443.4607991203268" r="8" fill="#111820" stroke="#3a4050" stroke-width="1.5" data-node="hub_h3" style="cursor:default"></circle><circle cx="920.2023683652884" cy="443.4607991203268" r="12" fill="transparent" data-node="hub_h3" style="cursor:default"></circle><circle cx="820.4961551545485" cy="416.98055525890544" r="8" fill="#111820" stroke="#3a4050" stroke-width="1.5" data-node="hub_h4" style="cursor:default"></circle><circle cx="820.4961551545485" cy="416.98055525890544" r="12" fill="transparent" data-node="hub_h4" style="cursor:default"></circle><circle cx="835.1202549794675" cy="354.90266428514303" r="8" fill="#111820" stroke="#3a4050" stroke-width="1.5" data-node="hub_h5" style="cursor:default"></circle><circle cx="835.1202549794675" cy="354.90266428514303" r="12" fill="transparent" data-node="hub_h5" style="cursor:default"></circle><circle cx="798.5220241920243" cy="289.82178395854555" r="8" fill="#111820" stroke="#3a4050" stroke-width="1.5" data-node="hub_h6" style="cursor:default"></circle><circle cx="798.5220241920243" cy="289.82178395854555" r="12" fill="transparent" data-node="hub_h6" style="cursor:default"></circle><circle cx="820.6397197751261" cy="261.4172032404476" r="8" fill="#111820" stroke="#3a4050" stroke-width="1.5" data-node="hub_h7" style="cursor:default"></circle><circle cx="820.6397197751261" cy="261.4172032404476" r="12" fill="transparent" data-node="hub_h7" style="cursor:default"></circle><circle cx="855.6599715787104" cy="198.6962272041279" r="8" fill="#111820" stroke="#3a4050" stroke-width="1.5" data-node="hub_h8" style="cursor:default"></circle><circle cx="855.6599715787104" cy="198.6962272041279" r="12" fill="transparent" data-node="hub_h8" style="cursor:default"></circle><circle cx="972.0655505453699" cy="229.527796146135" r="8" fill="#111820" stroke="#3a4050" stroke-width="1.5" data-node="hub_h9" style="cursor:default"></circle><circle cx="972.0655505453699" cy="229.527796146135" r="12" fill="transparent" data-node="hub_h9" style="cursor:default"></circle><circle cx="1026.1679957200347" cy="264.0579221783909" r="8" fill="#111820" stroke="#3a4050" stroke-width="1.5" data-node="hub_h10" style="cursor:default"></circle><circle cx="1026.1679957200347" cy="264.0579221783909" r="12" fill="transparent" data-node="hub_h10" style="cursor:default"></circle><circle cx="1073.0849752787583" cy="330.40099162716723" r="13" fill="#141828" stroke="#4a5868" stroke-width="2" data-node="hub_notable1" style="cursor:default"></circle><circle cx="1073.0849752787583" cy="330.40099162716723" r="7.15" fill="#2a3a2a44" pointer-events="none"></circle><text x="1073.0849752787583" y="331.40099162716723" text-anchor="middle" dominant-baseline="middle" font-size="9" pointer-events="none">🌟</text><circle cx="1073.0849752787583" cy="330.40099162716723" r="17" fill="transparent" data-node="hub_notable1" style="cursor:default"></circle><circle cx="944.5840235655716" cy="476.4234146262761" r="13" fill="#141828" stroke="#4a5868" stroke-width="2" data-node="hub_notable2" style="cursor:default"></circle><circle cx="944.5840235655716" cy="476.4234146262761" r="7.15" fill="#2a3a2a44" pointer-events="none"></circle><text x="944.5840235655716" y="477.4234146262761" text-anchor="middle" dominant-baseline="middle" font-size="9" pointer-events="none">🌟</text><circle cx="944.5840235655716" cy="476.4234146262761" r="17" fill="transparent" data-node="hub_notable2" style="cursor:default"></circle><circle cx="867.1710506733825" cy="131.88546881849095" r="13" fill="#141828" stroke="#4a5868" stroke-width="2" data-node="hub_notable3" style="cursor:default"></circle><circle cx="867.1710506733825" cy="131.88546881849095" r="7.15" fill="#2a3a2a44" pointer-events="none"></circle><text x="867.1710506733825" y="132.88546881849095" text-anchor="middle" dominant-baseline="middle" font-size="9" pointer-events="none">💰</text><circle cx="867.1710506733825" cy="131.88546881849095" r="17" fill="transparent" data-node="hub_notable3" style="cursor:default"></circle><circle cx="727.4375898741038" cy="313.8809616129056" r="13" fill="#141828" stroke="#4a5868" stroke-width="2" data-node="hub_notable4" style="cursor:default"></circle><circle cx="727.4375898741038" cy="313.8809616129056" r="7.15" fill="#2a3a2a44" pointer-events="none"></circle><text x="727.4375898741038" y="314.8809616129056" text-anchor="middle" dominant-baseline="middle" font-size="9" pointer-events="none">⚖️</text><circle cx="727.4375898741038" cy="313.8809616129056" r="17" fill="transparent" data-node="hub_notable4" style="cursor:default"></circle><circle cx="1107.2203029678733" cy="292.5093135048135" r="18" fill="#1a1020" stroke="#6a3080" stroke-width="2" data-node="hub_keystone1" style="cursor:default"></circle><circle cx="1107.2203029678733" cy="292.5093135048135" r="9.9" fill="#33113344" pointer-events="none"></circle><text x="1107.2203029678733" y="293.5093135048135" text-anchor="middle" dominant-baseline="middle" font-size="11" pointer-events="none">👑</text><circle cx="1107.2203029678733" cy="292.5093135048135" r="22" fill="transparent" data-node="hub_keystone1" style="cursor:default"></circle><circle cx="919.8331662132306" cy="524.877137128701" r="18" fill="#1a1020" stroke="#6a3080" stroke-width="2" data-node="hub_keystone2" style="cursor:default"></circle><circle cx="919.8331662132306" cy="524.877137128701" r="9.9" fill="#33113344" pointer-events="none"></circle><text x="919.8331662132306" y="525.877137128701" text-anchor="middle" dominant-baseline="middle" font-size="11" pointer-events="none">🎲</text><circle cx="919.8331662132306" cy="524.877137128701" r="22" fill="transparent" data-node="hub_keystone2" style="cursor:default"></circle><text x="698.3028997318302" y="192.83879999999996" text-anchor="middle" dominant-baseline="middle" font-size="10" fill="#c43c3c" font-weight="bold" opacity="0.7" pointer-events="none">💪Marauder</text><text x="899.5" y="76.67759999999998" text-anchor="middle" dominant-baseline="middle" font-size="10" fill="#9b59b6" font-weight="bold" opacity="0.7" pointer-events="none">🧠Witch</text><text x="1100.6971002681698" y="192.83879999999988" text-anchor="middle" dominant-baseline="middle" font-size="10" fill="#27ae60" font-weight="bold" opacity="0.7" pointer-events="none">🏹Ranger</text><text x="1100.6971002681698" y="425.1612" text-anchor="middle" dominant-baseline="middle" font-size="10" fill="#2980b9" font-weight="bold" opacity="0.7" pointer-events="none">🎭Shadow</text><text x="899.5" y="541.3224" text-anchor="middle" dominant-baseline="middle" font-size="10" fill="#f39c12" font-weight="bold" opacity="0.7" pointer-events="none">⚔️Templar</text><text x="698.3028997318302" y="425.1612" text-anchor="middle" dominant-baseline="middle" font-size="10" fill="#e67e22" font-weight="bold" opacity="0.7" pointer-events="none">⚔️Duelist</text><text x="1131.8224" y="309" text-anchor="middle" dominant-baseline="middle" font-size="10" fill="#bdc3c7" font-weight="bold" opacity="0.7" pointer-events="none">👑Scion</text></g></svg>
+  </div>
+  <div class="poe-tree-tooltip" id="poe-tree-tooltip" style="display: none; left: 766px; top: 456px;"><h4>❤️ Unermüdlich</h4><p class="tt-type">⭐ Bemerkenswerter Knoten</p><p class="tt-desc">Wunden heilen, ehe sie zählen. +18% Lebensregeneration, +20 Leben</p><p class="tt-stat">+18 Lebensregeneration</p><p class="tt-stat">+20 Leben</p><p class="tt-unavail">Nicht erreichbar</p></div>
+</div>
+
+<!-- SKILLS -->
+<div id="section-skills" class="panel hidden" style="grid-column:1/-1;">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap;">
+    <h2 style="margin:0;">💎 Skill-Gems</h2>
+    <div style="position:relative;">
+      <button id="skill-mode-btn" onclick="toggleSkillModeDropdown()" style="min-width:160px;display:flex;align-items:center;justify-content:space-between;gap:8px;">
+        <span id="skill-mode-label">⚔️ Aktive Skills</span> <span>▾</span>
+      </button>
+      <div id="skill-mode-dropdown" class="hidden" style="position:absolute;top:100%;left:0;z-index:500;background:var(--panel);border:1px solid var(--gold);border-radius:6px;min-width:180px;overflow:hidden;">
+        <div onclick="setSkillMode(&#39;active&#39;)" style="padding:10px 14px;cursor:pointer;hover:background:var(--panel-light);" onmouseover="this.style.background=&#39;#252535&#39;" onmouseout="this.style.background=&#39;&#39;">⚔️ Aktive Skills</div>
+        <div onclick="setSkillMode(&#39;support&#39;)" style="padding:10px 14px;cursor:pointer;" onmouseover="this.style.background=&#39;#252535&#39;" onmouseout="this.style.background=&#39;&#39;">✨ Support Gems</div>
+      </div>
+    </div>
+  </div>
+  <!-- Active Skills Panel -->
+  <div id="skill-panel-active">
+    <p style="color:#aaa;font-size:12px;margin-bottom:10px;">Wähle ein Item mit freiem Sockel, um einen aktiven Skill Gem einzusetzen.</p>
+    <div id="active-socket-items" class="flex"><div class="item-card" style="min-width: 180px;"><strong>⚔️ Rustic Sword</strong>
+        <p style="font-size:12px;color:#6699ff;margin:4px 0;">⬡ Sockel 1 (BLUE) — Leer</p>
+        <button onclick="openActiveGemPicker(&#39;njlc46jl9ov8&#39;, 0)" style="margin-top:4px;">+ Gem einsetzen</button></div></div>
+    <div id="active-gem-picker" class="hidden" style="margin-top:12px;">
+      <h3 id="active-picker-title" style="font-size:13px;color:var(--gold);margin-bottom:8px;"></h3>
+      <div id="active-gem-list" class="flex"></div>
+      <button onclick="cancelGemPick()" style="margin-top:8px;">Abbrechen</button>
+    </div>
+    <div style="margin-top:18px;">
+      <h3 style="font-size:14px;margin-bottom:8px;">⚔️ Aktive Skills (eingesetzt)</h3>
+      <div id="active-skills" class="flex"><p style="color:#666;font-size:12px;">Keine aktiven Skills eingesetzt.</p></div>
+    </div>
+  </div>
+  <!-- Support Gems Panel -->
+  <div id="skill-panel-support" class="hidden">
+    <p style="color:#aaa;font-size:12px;margin-bottom:10px;">Wähle ein Item mit einem aktiven Skill Gem, um passende Support Gems hinzuzufügen.</p>
+    <div id="support-active-items" class="flex"></div>
+    <div id="support-gem-picker" class="hidden" style="margin-top:12px;">
+      <h3 id="support-picker-title" style="font-size:13px;color:var(--gold);margin-bottom:8px;"></h3>
+      <p id="support-picker-info" style="font-size:12px;color:#aaa;margin-bottom:8px;"></p>
+      <div id="support-gem-list" class="flex"></div>
+      <button onclick="cancelGemPick()" style="margin-top:8px;">Abbrechen</button>
+    </div>
+    <div style="margin-top:18px;">
+      <h3 style="font-size:14px;margin-bottom:8px;">✨ Support Gems (eingesetzt)</h3>
+      <div id="support-skills" class="flex"><p style="color:#666;font-size:12px;">Keine Support Gems eingesetzt.</p></div>
+    </div>
+  </div>
+  <div class="tooltip" id="skill-tooltip"></div>
+</div>
+
+<!-- MAP/WORLD -->
+<div id="section-map" class="panel" style="grid-column:1/-1;">
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
+    <h2 style="margin:0;">🗺️ Welt &amp; Gebiete</h2>
+    <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+      <label style="font-size:13px;display:flex;align-items:center;gap:4px;cursor:pointer;">
+        <input type="checkbox" id="auto-combat-toggle2" onchange="toggleAutoCombat2()"> ⚡ Auto-Kampf
+      </label>
+      <button onclick="goToTown()">🏡 Stadt</button>
+      <button id="boss-btn" onclick="fightBoss()" disabled="">👑 Boss</button>
+    </div>
+  </div>
+  <!-- Zone select row -->
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px;">
+    <select id="zone-select" onchange="selectZone()" style="flex:1;min-width:180px;"><option value="The Twilight Strand">The Twilight Strand (Lvl 1, Akt 1)</option><option value="Mud Flats">Mud Flats (Lvl 2, Akt 1)</option><option value="Prisoner&#39;s Gate">Prisoner's Gate (Lvl 7, Akt 1)</option><option value="Vaal Ruins">Vaal Ruins (Lvl 18, Akt 2)</option></select>
+    <button onclick="enterZone()">🚪 Betreten</button>
+    <button id="map-btn" onclick="openMap()" disabled="">🗺️ Map</button>
+  </div>
+  <!-- Wave header -->
+  <div id="wave-header" class="" style="background:linear-gradient(90deg,#1a1a28,#25253a);border:1px solid #444;border-radius:8px;padding:10px 14px;margin-bottom:10px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+    <div>
+      <span style="color:#aaa;font-size:11px;">WELLE</span>
+      <div style="font-size:22px;font-weight:bold;color:var(--gold);" id="wave-num"><span class="wave-tier t1">T1 · Normal</span> 4</div>
+    </div>
+    <div style="flex:1;">
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:#aaa;margin-bottom:3px;">
+        <span>Wellenprogress</span><span id="wave-progress-txt">0 / 5</span>
+      </div>
+      <div class="bar" style="height:8px;"><span id="wave-progress-bar" style="background: linear-gradient(90deg, rgb(68, 68, 204), rgb(136, 136, 255)); width: 0%; display: block; height: 100%; border-radius: 8px; transition: width 0.3s;"></span></div>
+    </div>
+    <div id="wave-modifiers" style="font-size:11px;"><span style="color:#cccccc;font-size:10px;margin:2px;background:rgba(0,0,0,.4);padding:1px 5px;border-radius:3px;">🪖 Zäh</span></div>
+  </div>
+  <!-- Player vitals (in combat) -->
+  <div id="combat-vitals" class="" style="background:#0d0d1a;border:1px solid #333;border-radius:8px;padding:8px 12px;margin-bottom:10px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;position:relative;">
+    <div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:#aaa;"><span>❤️ Leben</span><span id="cv-life-txt">416 / 416</span></div>
+      <div class="bar life" style="height:10px;"><span id="cv-life-bar" style="width: 100%;"></span></div>
+    </div>
+    <div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:#aaa;"><span>💙 Mana</span><span id="cv-mana-txt">209 / 209</span></div>
+      <div class="bar mana" style="height:10px;"><span id="cv-mana-bar" style="width: 100%;"></span></div>
+    </div>
+    <div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:#aaa;"><span>🛡 ES</span><span id="cv-es-txt">50 / 78</span></div>
+      <div class="bar" style="height:10px;background:#222;"><span id="cv-es-bar" style="display: block; height: 100%; width: 64.1026%; background: linear-gradient(90deg, rgb(102, 204, 255), rgb(170, 221, 255)); border-radius: 8px; transition: width 0.2s;"></span></div>
+    </div>
+  </div>
+  <!-- Arena -->
+  <div style="display:flex;gap:10px;flex-wrap:wrap;">
+    <!-- Enemy field -->
+    <div style="flex:1;min-width:260px;">
+      <div id="enemy-field" class="arena" style="position: relative;"></div>
+    </div>
+    <!-- Active monster focus + bars -->
+    <div style="min-width:220px;max-width:280px;">
+      <div id="monster-box" class="monster-box player-cast" style="margin: 0px; position: relative;">
+    <h3>👹 Mage <span style="color:#666;">(Level 1)</span></h3>
+    <div class="bar life" style="margin:8px 0;">
+      <span style="width:157.14285714285714%"></span>
+    </div>
+    <p>💀 HP: 11/7</p>
+    <p>⚔️ Schaden: 4</p>
+    <p>💰 XP: 16</p>
+  </div>
+      <div style="margin-top:8px;" id="combat-actions">
+        <div id="flask-bar" style="display:flex;gap:8px;margin-bottom:8px;"><button onclick="useFlask(&#39;life&#39;)" title="Leben – 40% sofort. Ladungen durch Kills." style="flex:1;min-width:90px;padding:6px;border:2px solid #ff4444;background:rgba(0,0,0,.4);border-radius:6px;cursor:pointer;opacity:1;text-align:left;">
+      <div style="font-size:18px;line-height:1;">🧪 <span style="font-size:12px;color:#ff4444;font-weight:bold;">3/3</span></div>
+      <div style="height:4px;background:#222;border-radius:2px;margin-top:4px;overflow:hidden;"><div style="height:100%;width:100%;background:#ff4444;"></div></div>
+      <div style="font-size:10px;color:#aaa;margin-top:2px;">Leben</div>
+    </button><button onclick="useFlask(&#39;mana&#39;)" title="Mana – 35% sofort. Ladungen durch Kills." style="flex:1;min-width:90px;padding:6px;border:2px solid #4488ff;background:rgba(0,0,0,.4);border-radius:6px;cursor:pointer;opacity:1;text-align:left;">
+      <div style="font-size:18px;line-height:1;">🧪 <span style="font-size:12px;color:#4488ff;font-weight:bold;">3/3</span></div>
+      <div style="height:4px;background:#222;border-radius:2px;margin-top:4px;overflow:hidden;"><div style="height:100%;width:100%;background:#4488ff;"></div></div>
+      <div style="font-size:10px;color:#aaa;margin-top:2px;">Mana</div>
+    </button></div>
+        <div id="skill-bar" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+      </div>
+    </div>
+  </div>
+  <!-- Combat log -->
+  <h3 style="margin-top:12px;font-size:13px;color:#aaa;">📜 Kampf-Log</h3>
+  <div class="combat-log" id="combat-log"></div>
+</div>
+
+<!-- TOWN -->
+<div id="section-town" class="panel hidden" style="grid-column:1/-1;">
+  <h2>🏡 Stadt</h2>
+  <div class="grid2">
+    <div>
+      <div class="tab-container">
+        <div class="tab" onclick="showTownTab(&#39;stash&#39;)">🏦 Lagertruhe</div>
+        <div class="tab active" onclick="showTownTab(&#39;vendor&#39;)">🛒 Händler</div>
+        <div class="tab" onclick="showTownTab(&#39;crafting&#39;)">🔨 Schmied</div>
+      </div>
+      <div class="tab-content hidden" id="town-tab-stash">
+        <p>Kapazität: <span id="town-stash-count">0/500</span></p>
+        <div class="stash-grid" id="town-stash-grid"></div>
+        <button onclick="sortStash()" style="margin-top:8px;width:100%;">🔄 Stash sortieren</button>
+      </div>
+      <div class="tab-content" id="town-tab-vendor">
+        <div class="tab-container" style="margin-bottom:0;">
+          <div class="tab active" id="vtab-buy" onclick="showVendorSubTab(&#39;buy&#39;)">🛍️ Kaufen</div>
+          <div class="tab" id="vtab-gems" onclick="showVendorSubTab(&#39;gems&#39;)">💎 Gems</div>
+          <div class="tab" id="vtab-sell" onclick="showVendorSubTab(&#39;sell&#39;)">💰 Verkaufen</div>
+        </div>
+        <div class="tab-content" id="vendor-sub-buy">
+          <h3 style="margin-top:10px;">🛍️ Währungshändler</h3>
+          <div class="vendor-grid" id="currency-vendor"><div class="item-card">
+      <strong>💰 Scroll of Wisdom</strong>
+      <p>Kosten: 1 💰</p>
+      <button onclick="buyCurrency(&#39;Scroll of Wisdom&#39;, 1)">Kaufen</button>
+    </div><div class="item-card">
+      <strong>💰 Portal Scroll</strong>
+      <p>Kosten: 2 💰</p>
+      <button onclick="buyCurrency(&#39;Portal Scroll&#39;, 2)">Kaufen</button>
+    </div><div class="item-card">
+      <strong>💰 Transmutation Orb</strong>
+      <p>Kosten: 4 💰</p>
+      <button onclick="buyCurrency(&#39;Transmutation Orb&#39;, 4)">Kaufen</button>
+    </div><div class="item-card">
+      <strong>💰 Augmentation Orb</strong>
+      <p>Kosten: 3 💰</p>
+      <button onclick="buyCurrency(&#39;Augmentation Orb&#39;, 3)">Kaufen</button>
+    </div><div class="item-card">
+      <strong>💰 Alchemy Orb</strong>
+      <p>Kosten: 8 💰</p>
+      <button onclick="buyCurrency(&#39;Alchemy Orb&#39;, 8)">Kaufen</button>
+    </div><div class="item-card">
+      <strong>💰 Chaos Orb</strong>
+      <p>Kosten: 20 💰</p>
+      <button onclick="buyCurrency(&#39;Chaos Orb&#39;, 20)">Kaufen</button>
+    </div><div class="item-card">
+      <strong>💰 Exalted Orb</strong>
+      <p>Kosten: 100 💰</p>
+      <button onclick="buyCurrency(&#39;Exalted Orb&#39;, 100)">Kaufen</button>
+    </div><div class="item-card">
+      <strong>💰 Divine Orb</strong>
+      <p>Kosten: 50 💰</p>
+      <button onclick="buyCurrency(&#39;Divine Orb&#39;, 50)">Kaufen</button>
+    </div><div class="item-card">
+      <strong>💰 Chromatic Orb</strong>
+      <p>Kosten: 5 💰</p>
+      <button onclick="buyCurrency(&#39;Chromatic Orb&#39;, 5)">Kaufen</button>
+    </div><div class="item-card">
+      <strong>💰 Jeweller's Orb</strong>
+      <p>Kosten: 6 💰</p>
+      <button onclick="buyCurrency(&#39;Jeweller&#39;s Orb&#39;, 6)">Kaufen</button>
+    </div><div class="item-card">
+      <strong>💰 Fusing Orb</strong>
+      <p>Kosten: 8 💰</p>
+      <button onclick="buyCurrency(&#39;Fusing Orb&#39;, 8)">Kaufen</button>
+    </div><div class="item-card">
+      <strong>💰 Gemcutter's Prism</strong>
+      <p>Kosten: 10 💰</p>
+      <button onclick="buyCurrency(&#39;Gemcutter&#39;s Prism&#39;, 10)">Kaufen</button>
+    </div></div>
+          <h3 style="margin-top:15px;">🛠️ Item-Händler</h3>
+          <div class="vendor-grid" id="item-vendor"><div class="item-card" style="border-color: rgb(136, 136, 136);">
+      <div class="item-title">
+        <strong style="color:#888888">⚔️ Jagged Sword</strong>
+      </div>
+      <p style="color:#aaa;font-size:12px;">Jagged Sword</p>
+      
+      <div class="item-actions">
+        <button onclick="buyVendorItem(&#39;fpk0mq7ni10y&#39;, 6)">Kaufen (6 💰)</button>
+      </div>
+    </div><div class="item-card" style="border-color: rgb(136, 136, 136);">
+      <div class="item-title">
+        <strong style="color:#888888">💍 Topaz Ring</strong>
+      </div>
+      <p style="color:#aaa;font-size:12px;">Topaz Ring</p>
+      
+      <div class="item-actions">
+        <button onclick="buyVendorItem(&#39;bfw5imfzi10y&#39;, 6)">Kaufen (6 💰)</button>
+      </div>
+    </div><div class="item-card" style="border-color: rgb(136, 136, 136);">
+      <div class="item-title">
+        <strong style="color:#888888">⚔️ Rustic Sword</strong>
+      </div>
+      <p style="color:#aaa;font-size:12px;">Rustic Sword</p>
+      
+      <div class="item-actions">
+        <button onclick="buyVendorItem(&#39;2p92m5tmi10y&#39;, 6)">Kaufen (6 💰)</button>
+      </div>
+    </div><div class="item-card" style="border-color: rgb(255, 255, 0);">
+      <div class="item-title">
+        <strong style="color:#ffff00">💍 Sapphire Ring</strong>
+      </div>
+      <p style="color:#aaa;font-size:12px;">Sapphire Ring</p>
+      <div class="item-mods">Zauberschaden: +22<br>Zaubergeschwindigkeit: +5<br>Item Quantity: +4<br>Angriffsgeschwindigkeit: +9<br>Chaosschaden: +10<br>Bewegungsgeschwindigkeit: +4</div>
+      <div class="item-actions">
+        <button onclick="buyVendorItem(&#39;crfgrrvqi10y&#39;, 31)">Kaufen (31 💰)</button>
+      </div>
+    </div><div class="item-card" style="border-color: rgb(136, 136, 136);">
+      <div class="item-title">
+        <strong style="color:#888888">💍 Sapphire Ring</strong>
+      </div>
+      <p style="color:#aaa;font-size:12px;">Sapphire Ring</p>
+      
+      <div class="item-actions">
+        <button onclick="buyVendorItem(&#39;txznh0h0i10y&#39;, 6)">Kaufen (6 💰)</button>
+      </div>
+    </div><div class="item-card" style="border-color: rgb(136, 136, 136);">
+      <div class="item-title">
+        <strong style="color:#888888">💍 Amulet of Power</strong>
+      </div>
+      <p style="color:#aaa;font-size:12px;">Amulet of Power</p>
+      
+      <div class="item-actions">
+        <button onclick="buyVendorItem(&#39;fbxeimrhi10y&#39;, 6)">Kaufen (6 💰)</button>
+      </div>
+    </div></div>
+        </div>
+        <div class="tab-content hidden" id="vendor-sub-gems">
+          <h3 style="margin-top:10px;">💎 Skill Gems</h3>
+          <p style="color:#aaa;font-size:12px;margin-bottom:8px;">Aktive Gems für deine Skills — in Sockel einsetzen, um sie zu nutzen.</p>
+          <div class="vendor-grid" id="skill-gem-vendor"><div class="item-card red-gem">
+      <div class="item-title">
+        <strong style="color:#9e3a3a">⚔️ Cleave</strong>
+        <span style="color:#666;font-size:11px;">Aktiv</span>
+      </div>
+      <p style="color:#aaa;font-size:11px;margin:3px 0;">Schlägt in einem Bogen vor dir und trifft alle Gegner.</p>
+      <p style="color:#888;font-size:11px;margin:2px 0;">Klasse: Krieger</p>
+      <p style="color:#aaa;font-size:11px;">Mana: 6 | Schaden: 18 | Crit: +5%</p>
+      <div style="margin-top:6px;display:flex;gap:4px;flex-wrap:wrap;">
+        <span style="background:#1a1a30;border:1px solid #333;border-radius:3px;padding:1px 5px;font-size:10px;color:#888;">Attack</span><span style="background:#1a1a30;border:1px solid #333;border-radius:3px;padding:1px 5px;font-size:10px;color:#888;">AoE</span><span style="background:#1a1a30;border:1px solid #333;border-radius:3px;padding:1px 5px;font-size:10px;color:#888;">Physical</span><span style="background:#1a1a30;border:1px solid #333;border-radius:3px;padding:1px 5px;font-size:10px;color:#888;">Melee</span>
+      </div>
+      <div class="item-actions" style="margin-top:6px;">
+        <button onclick="buyGem(&#39;Cleave&#39;,&#39;active&#39;)" style="color:#9e3a3a;border-color:#9e3a3a;">Kaufen (15 💰)</button>
+      </div>
+    </div><div class="item-card blue-gem">
+      <div class="item-title">
+        <strong style="color:#3a3a9e">🔥 Fireball</strong>
+        <span style="color:#666;font-size:11px;">Aktiv</span>
+      </div>
+      <p style="color:#aaa;font-size:11px;margin:3px 0;">Wirft einen Feuerball, der beim Aufprall explodiert.</p>
+      <p style="color:#888;font-size:11px;margin:2px 0;">Klasse: Hexe</p>
+      <p style="color:#aaa;font-size:11px;">Mana: 8 | Schaden: 20 | Crit: +6%</p>
+      <div style="margin-top:6px;display:flex;gap:4px;flex-wrap:wrap;">
+        <span style="background:#1a1a30;border:1px solid #333;border-radius:3px;padding:1px 5px;font-size:10px;color:#888;">Spell</span><span style="background:#1a1a30;border:1px solid #333;border-radius:3px;padding:1px 5px;font-size:10px;color:#888;">Projectile</span><span style="background:#1a1a30;border:1px solid #333;border-radius:3px;padding:1px 5px;font-size:10px;color:#888;">Fire</span>
+      </div>
+      <div class="item-actions" style="margin-top:6px;">
+        <button onclick="buyGem(&#39;Fireball&#39;,&#39;active&#39;)" style="color:#3a3a9e;border-color:#3a3a9e;">Kaufen (20 💰)</button>
+      </div>
+    </div><div class="item-card green-gem">
+      <div class="item-title">
+        <strong style="color:#3a9e3a">⚡ LightningArrow</strong>
+        <span style="color:#666;font-size:11px;">Aktiv</span>
+      </div>
+      <p style="color:#aaa;font-size:11px;margin:3px 0;">Feuert einen Blitzpfeil ab, der Gegner durchschlägt.</p>
+      <p style="color:#888;font-size:11px;margin:2px 0;">Klasse: Ranger</p>
+      <p style="color:#aaa;font-size:11px;">Mana: 7 | Schaden: 15 | Crit: +7%</p>
+      <div style="margin-top:6px;display:flex;gap:4px;flex-wrap:wrap;">
+        <span style="background:#1a1a30;border:1px solid #333;border-radius:3px;padding:1px 5px;font-size:10px;color:#888;">Attack</span><span style="background:#1a1a30;border:1px solid #333;border-radius:3px;padding:1px 5px;font-size:10px;color:#888;">Projectile</span><span style="background:#1a1a30;border:1px solid #333;border-radius:3px;padding:1px 5px;font-size:10px;color:#888;">Lightning</span><span style="background:#1a1a30;border:1px solid #333;border-radius:3px;padding:1px 5px;font-size:10px;color:#888;">Bow</span>
+      </div>
+      <div class="item-actions" style="margin-top:6px;">
+        <button onclick="buyGem(&#39;LightningArrow&#39;,&#39;active&#39;)" style="color:#3a9e3a;border-color:#3a9e3a;">Kaufen (18 💰)</button>
+      </div>
+    </div><div class="item-card blue-gem">
+      <div class="item-title">
+        <strong style="color:#3a3a9e">❄️ IceSpear</strong>
+        <span style="color:#666;font-size:11px;">Aktiv</span>
+      </div>
+      <p style="color:#aaa;font-size:11px;margin:3px 0;">Feuert einen Eisspeer, der Gegner durchbohrt.</p>
+      <p style="color:#888;font-size:11px;margin:2px 0;">Klasse: Hexe</p>
+      <p style="color:#aaa;font-size:11px;">Mana: 9 | Schaden: 16 | Crit: +8%</p>
+      <div style="margin-top:6px;display:flex;gap:4px;flex-wrap:wrap;">
+        <span style="background:#1a1a30;border:1px solid #333;border-radius:3px;padding:1px 5px;font-size:10px;color:#888;">Spell</span><span style="background:#1a1a30;border:1px solid #333;border-radius:3px;padding:1px 5px;font-size:10px;color:#888;">Projectile</span><span style="background:#1a1a30;border:1px solid #333;border-radius:3px;padding:1px 5px;font-size:10px;color:#888;">Cold</span>
+      </div>
+      <div class="item-actions" style="margin-top:6px;">
+        <button onclick="buyGem(&#39;IceSpear&#39;,&#39;active&#39;)" style="color:#3a3a9e;border-color:#3a3a9e;">Kaufen (22 💰)</button>
+      </div>
+    </div><div class="item-card green-gem">
+      <div class="item-title">
+        <strong style="color:#3a9e3a">💜 PoisonStrike</strong>
+        <span style="color:#666;font-size:11px;">Aktiv</span>
+      </div>
+      <p style="color:#aaa;font-size:11px;margin:3px 0;">Trifft den Gegner und vergiftet ihn.</p>
+      <p style="color:#888;font-size:11px;margin:2px 0;">Klasse: Shadow</p>
+      <p style="color:#aaa;font-size:11px;">Mana: 7 | Schaden: 14 | Crit: +8%</p>
+      <div style="margin-top:6px;display:flex;gap:4px;flex-wrap:wrap;">
+        <span style="background:#1a1a30;border:1px solid #333;border-radius:3px;padding:1px 5px;font-size:10px;color:#888;">Attack</span><span style="background:#1a1a30;border:1px solid #333;border-radius:3px;padding:1px 5px;font-size:10px;color:#888;">Chaos</span><span style="background:#1a1a30;border:1px solid #333;border-radius:3px;padding:1px 5px;font-size:10px;color:#888;">Poison</span><span style="background:#1a1a30;border:1px solid #333;border-radius:3px;padding:1px 5px;font-size:10px;color:#888;">Melee</span>
+      </div>
+      <div class="item-actions" style="margin-top:6px;">
+        <button onclick="buyGem(&#39;PoisonStrike&#39;,&#39;active&#39;)" style="color:#3a9e3a;border-color:#3a9e3a;">Kaufen (17 💰)</button>
+      </div>
+    </div><div class="item-card blue-gem">
+      <div class="item-title">
+        <strong style="color:#3a3a9e">⚡ Arc</strong>
+        <span style="color:#666;font-size:11px;">Aktiv</span>
+      </div>
+      <p style="color:#aaa;font-size:11px;margin:3px 0;">Blitz schlägt zwischen nahen Gegnern ein.</p>
+      <p style="color:#888;font-size:11px;margin:2px 0;">Klasse: Templar</p>
+      <p style="color:#aaa;font-size:11px;">Mana: 8 | Schaden: 17 | Crit: +6%</p>
+      <div style="margin-top:6px;display:flex;gap:4px;flex-wrap:wrap;">
+        <span style="background:#1a1a30;border:1px solid #333;border-radius:3px;padding:1px 5px;font-size:10px;color:#888;">Spell</span><span style="background:#1a1a30;border:1px solid #333;border-radius:3px;padding:1px 5px;font-size:10px;color:#888;">Lightning</span><span style="background:#1a1a30;border:1px solid #333;border-radius:3px;padding:1px 5px;font-size:10px;color:#888;">Chaining</span>
+      </div>
+      <div class="item-actions" style="margin-top:6px;">
+        <button onclick="buyGem(&#39;Arc&#39;,&#39;active&#39;)" style="color:#3a3a9e;border-color:#3a3a9e;">Kaufen (20 💰)</button>
+      </div>
+    </div><div class="item-card red-gem">
+      <div class="item-title">
+        <strong style="color:#9e3a3a">🌪️ Cyclone</strong>
+        <span style="color:#666;font-size:11px;">Aktiv</span>
+      </div>
+      <p style="color:#aaa;font-size:11px;margin:3px 0;">Dreht sich schnell und trifft alle Gegner in der Nähe.</p>
+      <p style="color:#888;font-size:11px;margin:2px 0;">Klasse: Krieger</p>
+      <p style="color:#aaa;font-size:11px;">Mana: 5 | Schaden: 16 | Crit: +5%</p>
+      <div style="margin-top:6px;display:flex;gap:4px;flex-wrap:wrap;">
+        <span style="background:#1a1a30;border:1px solid #333;border-radius:3px;padding:1px 5px;font-size:10px;color:#888;">Attack</span><span style="background:#1a1a30;border:1px solid #333;border-radius:3px;padding:1px 5px;font-size:10px;color:#888;">AoE</span><span style="background:#1a1a30;border:1px solid #333;border-radius:3px;padding:1px 5px;font-size:10px;color:#888;">Physical</span><span style="background:#1a1a30;border:1px solid #333;border-radius:3px;padding:1px 5px;font-size:10px;color:#888;">Melee</span>
+      </div>
+      <div class="item-actions" style="margin-top:6px;">
+        <button onclick="buyGem(&#39;Cyclone&#39;,&#39;active&#39;)" style="color:#9e3a3a;border-color:#9e3a3a;">Kaufen (25 💰)</button>
+      </div>
+    </div><div class="item-card blue-gem">
+      <div class="item-title">
+        <strong style="color:#3a3a9e">💀 SummonSkeletons</strong>
+        <span style="color:#666;font-size:11px;">Aktiv</span>
+      </div>
+      <p style="color:#aaa;font-size:11px;margin:3px 0;">Beschwört skelettartige Diener, die für dich kämpfen.</p>
+      <p style="color:#888;font-size:11px;margin:2px 0;">Klasse: Hexe</p>
+      <p style="color:#aaa;font-size:11px;">Mana: 12 | Schaden: 10 | Crit: +2%</p>
+      <div style="margin-top:6px;display:flex;gap:4px;flex-wrap:wrap;">
+        <span style="background:#1a1a30;border:1px solid #333;border-radius:3px;padding:1px 5px;font-size:10px;color:#888;">Spell</span><span style="background:#1a1a30;border:1px solid #333;border-radius:3px;padding:1px 5px;font-size:10px;color:#888;">Minion</span>
+      </div>
+      <div class="item-actions" style="margin-top:6px;">
+        <button onclick="buyGem(&#39;SummonSkeletons&#39;,&#39;active&#39;)" style="color:#3a3a9e;border-color:#3a3a9e;">Kaufen (28 💰)</button>
+      </div>
+    </div></div>
+          <h3 style="margin-top:15px;">✨ Support Gems</h3>
+          <p style="color:#aaa;font-size:12px;margin-bottom:8px;">Support Gems verstärken verlinkte aktive Gems.</p>
+          <div class="vendor-grid" id="support-gem-vendor"><div class="item-card red-gem">
+      <div class="item-title">
+        <strong style="color:#9e3a3a">🔥 AddedFireDamage</strong>
+        <span style="color:#666;font-size:11px;">Support</span>
+      </div>
+      <p style="color:#aaa;font-size:11px;margin:3px 0;">+30% Feuerschaden</p>
+      <div style="margin:4px 0;display:flex;gap:4px;flex-wrap:wrap;">
+        <span style="background:#1a1a30;border:1px solid #333;border-radius:3px;padding:1px 5px;font-size:10px;color:#888;">Fire</span>
+      </div>
+      <div class="item-actions" style="margin-top:6px;">
+        <button onclick="buyGem(&#39;AddedFireDamage&#39;,&#39;support&#39;)" style="color:#9e3a3a;border-color:#9e3a3a;">Kaufen (12 💰)</button>
+      </div>
+    </div><div class="item-card green-gem">
+      <div class="item-title">
+        <strong style="color:#3a9e3a">⚡ FasterAttacks</strong>
+        <span style="color:#666;font-size:11px;">Support</span>
+      </div>
+      <p style="color:#aaa;font-size:11px;margin:3px 0;">+35% Angriffsgeschwindigkeit</p>
+      <div style="margin:4px 0;display:flex;gap:4px;flex-wrap:wrap;">
+        <span style="background:#1a1a30;border:1px solid #333;border-radius:3px;padding:1px 5px;font-size:10px;color:#888;">Attack</span>
+      </div>
+      <div class="item-actions" style="margin-top:6px;">
+        <button onclick="buyGem(&#39;FasterAttacks&#39;,&#39;support&#39;)" style="color:#3a9e3a;border-color:#3a9e3a;">Kaufen (14 💰)</button>
+      </div>
+    </div><div class="item-card blue-gem">
+      <div class="item-title">
+        <strong style="color:#3a3a9e">🌪️ FasterCasting</strong>
+        <span style="color:#666;font-size:11px;">Support</span>
+      </div>
+      <p style="color:#aaa;font-size:11px;margin:3px 0;">+30% Zaubergeschwindigkeit</p>
+      <div style="margin:4px 0;display:flex;gap:4px;flex-wrap:wrap;">
+        <span style="background:#1a1a30;border:1px solid #333;border-radius:3px;padding:1px 5px;font-size:10px;color:#888;">Spell</span>
+      </div>
+      <div class="item-actions" style="margin-top:6px;">
+        <button onclick="buyGem(&#39;FasterCasting&#39;,&#39;support&#39;)" style="color:#3a3a9e;border-color:#3a3a9e;">Kaufen (14 💰)</button>
+      </div>
+    </div><div class="item-card green-gem">
+      <div class="item-title">
+        <strong style="color:#3a9e3a">🎯 MultipleProjectiles</strong>
+        <span style="color:#666;font-size:11px;">Support</span>
+      </div>
+      <p style="color:#aaa;font-size:11px;margin:3px 0;">+50% mehr Projektile</p>
+      <div style="margin:4px 0;display:flex;gap:4px;flex-wrap:wrap;">
+        <span style="background:#1a1a30;border:1px solid #333;border-radius:3px;padding:1px 5px;font-size:10px;color:#888;">Projectile</span>
+      </div>
+      <div class="item-actions" style="margin-top:6px;">
+        <button onclick="buyGem(&#39;MultipleProjectiles&#39;,&#39;support&#39;)" style="color:#3a9e3a;border-color:#3a9e3a;">Kaufen (18 💰)</button>
+      </div>
+    </div><div class="item-card blue-gem">
+      <div class="item-title">
+        <strong style="color:#3a3a9e">💥 IncreasedCriticalStrikes</strong>
+        <span style="color:#666;font-size:11px;">Support</span>
+      </div>
+      <p style="color:#aaa;font-size:11px;margin:3px 0;">+10% kritische Trefferchance</p>
+      <div style="margin:4px 0;display:flex;gap:4px;flex-wrap:wrap;">
+        <span style="background:#1a1a30;border:1px solid #333;border-radius:3px;padding:1px 5px;font-size:10px;color:#888;">Attack</span><span style="background:#1a1a30;border:1px solid #333;border-radius:3px;padding:1px 5px;font-size:10px;color:#888;">Spell</span>
+      </div>
+      <div class="item-actions" style="margin-top:6px;">
+        <button onclick="buyGem(&#39;IncreasedCriticalStrikes&#39;,&#39;support&#39;)" style="color:#3a3a9e;border-color:#3a3a9e;">Kaufen (16 💰)</button>
+      </div>
+    </div><div class="item-card blue-gem">
+      <div class="item-title">
+        <strong style="color:#3a3a9e">🔗 Chain</strong>
+        <span style="color:#666;font-size:11px;">Support</span>
+      </div>
+      <p style="color:#aaa;font-size:11px;margin:3px 0;">Projektil ketten zu 2 weiteren Gegnern</p>
+      <div style="margin:4px 0;display:flex;gap:4px;flex-wrap:wrap;">
+        <span style="background:#1a1a30;border:1px solid #333;border-radius:3px;padding:1px 5px;font-size:10px;color:#888;">Projectile</span><span style="background:#1a1a30;border:1px solid #333;border-radius:3px;padding:1px 5px;font-size:10px;color:#888;">Chaining</span>
+      </div>
+      <div class="item-actions" style="margin-top:6px;">
+        <button onclick="buyGem(&#39;Chain&#39;,&#39;support&#39;)" style="color:#3a3a9e;border-color:#3a3a9e;">Kaufen (20 💰)</button>
+      </div>
+    </div><div class="item-card green-gem">
+      <div class="item-title">
+        <strong style="color:#3a9e3a">→ Pierce</strong>
+        <span style="color:#666;font-size:11px;">Support</span>
+      </div>
+      <p style="color:#aaa;font-size:11px;margin:3px 0;">Projektil durchschlägt 2 Gegner</p>
+      <div style="margin:4px 0;display:flex;gap:4px;flex-wrap:wrap;">
+        <span style="background:#1a1a30;border:1px solid #333;border-radius:3px;padding:1px 5px;font-size:10px;color:#888;">Projectile</span>
+      </div>
+      <div class="item-actions" style="margin-top:6px;">
+        <button onclick="buyGem(&#39;Pierce&#39;,&#39;support&#39;)" style="color:#3a9e3a;border-color:#3a9e3a;">Kaufen (15 💰)</button>
+      </div>
+    </div><div class="item-card blue-gem">
+      <div class="item-title">
+        <strong style="color:#3a3a9e">💀 MinionDamage</strong>
+        <span style="color:#666;font-size:11px;">Support</span>
+      </div>
+      <p style="color:#aaa;font-size:11px;margin:3px 0;">+40% Dienerschaden</p>
+      <div style="margin:4px 0;display:flex;gap:4px;flex-wrap:wrap;">
+        <span style="background:#1a1a30;border:1px solid #333;border-radius:3px;padding:1px 5px;font-size:10px;color:#888;">Minion</span>
+      </div>
+      <div class="item-actions" style="margin-top:6px;">
+        <button onclick="buyGem(&#39;MinionDamage&#39;,&#39;support&#39;)" style="color:#3a3a9e;border-color:#3a3a9e;">Kaufen (18 💰)</button>
+      </div>
+    </div><div class="item-card red-gem">
+      <div class="item-title">
+        <strong style="color:#9e3a3a">❤️ LifeLeech</strong>
+        <span style="color:#666;font-size:11px;">Support</span>
+      </div>
+      <p style="color:#aaa;font-size:11px;margin:3px 0;">2% des Schadens als Lebensraub</p>
+      <div style="margin:4px 0;display:flex;gap:4px;flex-wrap:wrap;">
+        <span style="background:#1a1a30;border:1px solid #333;border-radius:3px;padding:1px 5px;font-size:10px;color:#888;">Attack</span><span style="background:#1a1a30;border:1px solid #333;border-radius:3px;padding:1px 5px;font-size:10px;color:#888;">Spell</span>
+      </div>
+      <div class="item-actions" style="margin-top:6px;">
+        <button onclick="buyGem(&#39;LifeLeech&#39;,&#39;support&#39;)" style="color:#9e3a3a;border-color:#9e3a3a;">Kaufen (22 💰)</button>
+      </div>
+    </div><div class="item-card blue-gem">
+      <div class="item-title">
+        <strong style="color:#3a3a9e">💙 ManaLeech</strong>
+        <span style="color:#666;font-size:11px;">Support</span>
+      </div>
+      <p style="color:#aaa;font-size:11px;margin:3px 0;">1% des Schadens als Manarub</p>
+      <div style="margin:4px 0;display:flex;gap:4px;flex-wrap:wrap;">
+        <span style="background:#1a1a30;border:1px solid #333;border-radius:3px;padding:1px 5px;font-size:10px;color:#888;">Attack</span><span style="background:#1a1a30;border:1px solid #333;border-radius:3px;padding:1px 5px;font-size:10px;color:#888;">Spell</span>
+      </div>
+      <div class="item-actions" style="margin-top:6px;">
+        <button onclick="buyGem(&#39;ManaLeech&#39;,&#39;support&#39;)" style="color:#3a3a9e;border-color:#3a3a9e;">Kaufen (18 💰)</button>
+      </div>
+    </div></div>
+        </div>
+        <div class="tab-content hidden" id="vendor-sub-sell">
+          <h3 style="margin-top:10px;">💰 Inventar verkaufen</h3>
+          <p style="color:#aaa;font-size:12px;margin-bottom:8px;">Klicke auf Items um sie zu markieren, dann auf "Ausgewählte verkaufen".</p>
+          <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
+            <button onclick="sellSelectedItems()" id="sell-selected-btn" disabled="">💰 Ausgewählte verkaufen (<span id="sell-total">0</span> 💰)</button>
+            <button onclick="selectAllSellItems()">☑️ Alle auswählen</button>
+            <button onclick="deselectAllSellItems()">☐ Alle abwählen</button>
+          </div>
+          <div class="sell-item-grid" id="sell-inventory-grid"><p style="color:#666;grid-column:1/-1;padding:10px;">Keine verkäuflichen Items im Inventar.</p></div>
+        </div>
+      </div>
+      <div class="tab-content hidden" id="town-tab-crafting">
+        <h3>🔨 Schmied</h3>
+        <p style="color:#aaa;font-size:13px;margin-bottom:10px;">Wähle ein Item aus deinem Inventar aus und sieh, welche Currency du darauf anwenden kannst und was sie bewirkt.</p>
+        <button onclick="openCraftingModal()">🔨 Crafting öffnen</button>
+        <div id="crafting-result" style="margin-top:10px;"><p style="color:#aaa;">Klicke auf "Crafting öffnen", um ein Item auszuwählen.</p></div>
+      </div>
+    </div>
+    <div>
+      <h3>📜 Quests</h3>
+      <div id="quest-log" style="max-height:400px;overflow:auto;"><div style="padding: 8px; margin: 4px 0px; background: rgb(68, 34, 34); border-radius: 4px;">
+      <strong>🔘 Die erste Reise</strong>
+      <p style="color:#aaa;font-size:12px;">Betritt das erste Gebiet</p>
+      <p style="color:#aaa;font-size:12px;">Belohnung: Scroll of Wisdom x5</p>
+    </div><div style="padding: 8px; margin: 4px 0px; background: rgb(34, 68, 34); border-radius: 4px;">
+      <strong>✅ Der erste Gegner</strong>
+      <p style="color:#aaa;font-size:12px;">Besiege 10 Gegner</p>
+      <p style="color:#aaa;font-size:12px;">Belohnung: Transmutation Orb x1</p>
+    </div><div style="padding: 8px; margin: 4px 0px; background: rgb(68, 34, 34); border-radius: 4px;">
+      <strong>🔘 Die Vaal Ruinen</strong>
+      <p style="color:#aaa;font-size:12px;">Betritt die Vaal Ruinen</p>
+      <p style="color:#aaa;font-size:12px;">Belohnung: Augmentation Orb x1</p>
+    </div><div style="padding: 8px; margin: 4px 0px; background: rgb(68, 34, 34); border-radius: 4px;">
+      <strong>🔘 Der erste seltene Gegner</strong>
+      <p style="color:#aaa;font-size:12px;">Besiege einen seltenen Gegner</p>
+      <p style="color:#aaa;font-size:12px;">Belohnung: Alchemy Orb x1</p>
+    </div><div style="padding: 8px; margin: 4px 0px; background: rgb(68, 34, 34); border-radius: 4px;">
+      <strong>🔘 Das Herz der Bestie</strong>
+      <p style="color:#aaa;font-size:12px;">Betritt Belly of the Beast</p>
+      <p style="color:#aaa;font-size:12px;">Belohnung: Chaos Orb x1</p>
+    </div><div style="padding: 8px; margin: 4px 0px; background: rgb(68, 34, 34); border-radius: 4px;">
+      <strong>🔘 Der Shaper</strong>
+      <p style="color:#aaa;font-size:12px;">Besiege den Shaper</p>
+      <p style="color:#aaa;font-size:12px;">Belohnung: Exalted Orb x1</p>
+    </div></div>
+      <h3 style="margin-top:15px;">📊 Statistiken</h3>
+      <div id="town-stats">
+        <div class="stat"><span>Kills:</span><strong id="town-kills">91</strong></div>
+        <div class="stat"><span>Tode:</span><strong id="town-deaths">4</strong></div>
+        <div class="stat"><span>Level:</span><strong id="town-level">7</strong></div>
+        <div class="stat"><span>Gold:</span><strong id="town-gold" style="color:var(--gold);">397</strong></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SETTINGS -->
+<div id="section-settings" class="panel hidden" style="grid-column:1/-1;">
+  <h2>⚙️ Optionen</h2>
+  <div class="grid2">
+    <div>
+      <h3>🎮 Spiel</h3>
+      <div style="margin-bottom:8px;">
+        <label><input type="checkbox" id="auto-combat-toggle" onchange="toggleAutoCombat()"> Auto-Kampf</label>
+      </div>
+      <div style="margin-bottom:8px;">
+        <label><input type="checkbox" id="idle-mode-toggle" onchange="toggleIdleMode()"> Idle-Modus</label>
+      </div>
+      <button onclick="newGame()" style="color:#ff6666;">🆕 Neues Spiel</button>
+    </div>
+    <div>
+      <h3>💾 Speichern</h3>
+      <button onclick="saveGame()">💾 Speichern</button>
+      <button onclick="exportGame()">📤 Export</button>
+      <button onclick="importGame()">📥 Import</button>
+      <textarea id="saveBox" class="hidden" rows="5" style="width:100%;background:#000;color:#fff;border:1px solid var(--gray);margin-top:8px;"></textarea>
+    </div>
+  </div>
+</div>
+
+<!-- HIDDEN ELEMENTS -->
+<div class="tooltip" id="item-tooltip" style="display: none; left: 326px; top: 805.984px;"><h4 style="color:#ffff00;margin:0 0 8px 0;">🛡️ Phoenix Shelter Leather Vest</h4><p style="color:#aaa;margin:0 0 8px 0;">Leather Vest</p><p style="color:#aaa;margin:0 0 8px 0;">Item</p><p style="color:#aaa;margin:0 0 8px 0;">Rarität: Rare</p><div style="margin-top:8px;border-top:1px solid #333;padding-top:8px;"><p style="color:#aaa;margin:0 0 4px 0;">Modifikatoren:</p><p class="mod positive" style="margin:0;">Energieschild: +62</p><p class="mod positive" style="margin:0;">Kälteschaden: +28</p><p class="mod positive" style="margin:0;">Blitzresistenz: +18</p><p class="mod positive" style="margin:0;">Kälteresistenz: +14</p><p class="mod positive" style="margin:0;">Angriffsgeschwindigkeit: +7</p></div><div style="margin-top:8px;border-top:1px solid #333;padding-top:8px;"><p style="color:#aaa;margin:0 0 4px 0;">Sockel (3) · Links: 2-1</p><div class="sock-row"><span class="sock-group"><span class="sock red" title="RED - 🌪️ Cyclone"></span><span class="sock-link"></span><span class="sock green" title="GREEN - ⚡ FasterAttacks"></span></span><span class="sock-group"><span class="sock blue" title="BLUE - Leer"></span></span></div><p style="margin:0;font-size:11px;color:#ff6666;">1. [RED] G1 - 🌪️ Cyclone</p><p style="margin:0;font-size:11px;color:#66ff66;">2. [GREEN] G1 - ⚡ FasterAttacks</p><p style="margin:0;font-size:11px;color:#6699ff;">3. [BLUE] G2 - Leer</p><div style="margin-top:6px;padding-top:6px;border-top:1px dashed #333;"><p style="margin:0;color:var(--gold);font-size:11px;">🌪️ Cyclone (verlinkt)</p><p style="margin:0;color:#66ff66;font-size:11px;">↳ ⚡ FasterAttacks </p><p style="margin:2px 0 0 0;font-size:11px;color:#ccc;">💙6 ⚔️16</p></div></div><p style="color:#aaa;margin:8px 0 0 0;font-size:12px;">Slot: Rüstung</p></div>
+<div class="tooltip" id="equip-tooltip" style="display: none; left: 824.625px; top: 502px;"><h4 style="color:var(--gold);margin:0 0 8px 0;">🏃 +15% Ausweichen</h4><p style="color:#aaa;margin:0 0 8px 0;">Typ: Normaler Knoten</p><p style="color:#aaa;margin:0 0 8px 0;">+15% Ausweichchance</p><div style="margin-top:8px;border-top:1px solid #333;padding-top:8px;"><p style="color:#aaa;margin:0 0 4px 0;">Boni:</p><p class="mod positive" style="margin:0;">Ausweichen: +15</p></div><p style="color:#ff6666;margin:8px 0 0 0;">Nicht verfügbar</p></div>
+
+<!-- CRAFTING MODAL -->
+<div class="modal-overlay hidden" id="craft-modal-overlay" onclick="if(event.target===this) closeCraftingModal()">
+  <div class="craft-modal">
+    <div class="craft-modal-header">
+      <h3>🔨 Crafting</h3>
+      <button class="craft-close-btn" onclick="closeCraftingModal()">✕ Schließen</button>
+    </div>
+    <select id="craft-item-select" onchange="onCraftItemSelectChange()" style="margin-bottom:12px;">
+      <option value="">Wähle ein Item zum Craften</option>
+    </select>
+    <div id="craft-item-preview"></div>
+    <div id="craft-currency-list"></div>
+  </div>
+</div>
+
+<!-- Socket Gem Modal -->
+<div class="modal-overlay hidden" id="socket-modal-overlay" onclick="if(event.target===this) closeSocketModal()">
+  <div class="craft-modal" style="max-width:720px;">
+    <div class="craft-modal-header">
+      <h3>💎 Gems sockeln</h3>
+      <button class="craft-close-btn" onclick="closeSocketModal()">✕ Schließen</button>
+    </div>
+    <div id="socket-modal-body"><div style="text-align:center;"><h4 style="color:#ffff00;margin:0;">🛡️ Phoenix Shelter Leather Vest</h4><p style="color:#888;margin:2px 0 0;font-size:12px;">Leather Vest · Inventar</p></div><div class="big-sock-row"><div class="big-sock-group"><div class="big-sock red" title="RED Sockel – Cyclone" onclick="onSocketClick(0)">🌪️</div><div class="big-sock-link"></div><div class="big-sock green" title="GREEN Sockel – FasterAttacks" onclick="onSocketClick(1)">⚡</div></div><div class="big-sock-group"><div class="big-sock blue" title="BLUE Sockel – Leer" onclick="onSocketClick(2)"><span class="big-sock-empty-dot">●</span></div></div></div><p style="color:#aaa;text-align:center;margin:8px 0;font-size:12px;">Klicke einen Sockel, um ein Gem einzusetzen oder zu tauschen. Verbundene Sockel (goldene Linie) lassen Support-Gems den Skill verstärken.</p><div style="margin-top:10px;border-top:1px solid #333;padding-top:8px;"><strong style="color:var(--gold);">Eingesetzte Gems:</strong><div style="margin:6px 0;padding:6px;background:#15151c;border-left:3px solid #ff6666;">
+          <div><strong style="color:#ff6666;">🌪️ Cyclone</strong> <span style="color:#888;">(Skill, Sockel #1)</span></div><div style="color:#aaa;font-size:11px;margin-top:2px;">Verlinkte Supports: <span style="color:#66ff66;">FasterAttacks</span></div></div><div style="margin:6px 0;padding:6px;background:#15151c;border-left:3px solid #66ff66;">
+          <div><strong style="color:#66ff66;">⚡ FasterAttacks</strong> <span style="color:#888;">(Support, Sockel #2)</span></div></div></div></div>
+  </div>
+</div>
+
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/state.js"></script>
+<script src="js/navigation.js"></script>
+<script src="js/character.js"></script>
+<script src="js/equipment.js"></script>
+<script src="js/combat.js"></script>
+<script src="js/skills.js"></script>
+<script src="js/map.js"></script>
+<script src="js/town.js"></script>
+<script src="js/save.js"></script>
+<script src="js/main.js"></script>
+
+</body>
+</html>
