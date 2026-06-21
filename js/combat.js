@@ -1081,7 +1081,7 @@ function dropLoot(monster) {
 
   // Item drop
   if (Math.random() < Math.min(0.9, 0.3 * qBonus)) {
-    const slot = pick(['weapon', 'armour', 'accessory']);
+    const slot = pick(EQUIP_SLOT_KEYS);
     const rarity = pickWeighted([
       {value: 'normal', weight: Math.max(10, 60 - rBonus * 0.5)},
       {value: 'magic', weight: 25 + rBonus * 0.15},

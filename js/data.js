@@ -47,10 +47,52 @@ const ICONS = {
   life: '❤️', mana: '💙', es: '⚡',
   gold: '💰', xp: '✨',
   weapon: '⚔️', armour: '🛡️', accessory: '💍',
+  // Granular equip-slot icons (PoE-style distinct paper-doll slots)
+  chest: '🛡️', helm: '🪖', gloves: '🧤', boots: '👢',
+  ring: '💍', amulet: '💎', belt: '🪢',
   fire: '🔥', cold: '❄️', lightning: '⚡', chaos: '💜',
   gem: '💎', currency: '💰', socket: '◎',
   monster: '👹', boss: '👑', map: '🗺️'
 };
+
+// ========== EQUIP-SLOT SYSTEM ==========
+// Granular equip slot keys - every generated item is assigned exactly one of
+// these (item.equipSlot), which is what actually determines which paper-doll
+// slot it can go into. This replaces the old broad weapon/armour/accessory
+// categorisation that let e.g. a ring be equipped into the belt slot.
+const EQUIP_SLOT_KEYS = ['weapon', 'chest', 'helm', 'gloves', 'boots', 'ring', 'amulet', 'belt'];
+
+// Broad category per granular slot - still used for sockets, generic stat
+// handling and backward-compatible save data (item.slot).
+const EQUIP_SLOT_CATEGORY = {
+  weapon: 'weapon',
+  chest: 'armour', helm: 'armour', gloves: 'armour', boots: 'armour',
+  ring: 'accessory', amulet: 'accessory', belt: 'accessory'
+};
+
+// Human-readable names per granular slot (tooltips, equip messages)
+const EQUIP_SLOT_NAMES = {
+  weapon: 'Waffe', chest: 'Brustplatte', helm: 'Helm', gloves: 'Handschuhe',
+  boots: 'Stiefel', ring: 'Ring', amulet: 'Amulett', belt: 'Gürtel'
+};
+
+// Affix tag groups - which granular slots a given prefix/suffix is allowed to roll on.
+// Omitting the tags argument on an affix entry means "any slot".
+const SLOT_WEAPON = ['weapon'];
+const SLOT_DEFENSE = ['chest', 'helm', 'gloves', 'boots', 'belt'];
+const SLOT_JEWELRY = ['ring', 'amulet', 'belt'];
+const SLOT_RESIST = ['chest', 'helm', 'gloves', 'boots', 'ring', 'amulet', 'belt'];
+const SLOT_WEAPON_GLOVES = ['weapon', 'gloves'];
+const SLOT_WEAPON_AMULET_RING = ['weapon', 'amulet', 'ring'];
+const SLOT_WEAPON_AMULET = ['weapon', 'amulet'];
+const SLOT_BOOTS = ['boots'];
+
+// PoE-style affix tiers: T1 is the BEST roll and requires the highest item level;
+// T6 is the worst roll and is available from item level 1. Tiers are deliberately
+// uniform across all affixes to keep the system easy to read at a glance.
+const AFFIX_TIER_COUNT = 6;
+const AFFIX_TIER_ILVL = {1: 75, 2: 58, 3: 42, 4: 28, 5: 14, 6: 1};
+const AFFIX_TIER_WEIGHTS = {1: 3, 2: 6, 3: 12, 4: 20, 5: 30, 6: 40};
 
 // ========== GAME DATA ==========
 
@@ -121,78 +163,218 @@ const CLASSES = {
   }
 };
 
-// Equipment slots
+// Equipment slots (paper-doll). `accepts` is the granular equip-slot key
+// (item.equipSlot) that a piece of gear must have to go here - this is the
+// actual fix for rings/belts/amulets being interchangeable.
 const EQUIPMENT_SLOTS = [
-  {id: 'weapon', name: 'Waffe', icon: '⚔️', slot: 'weapon', type: 'weapon'},
-  {id: 'chest', name: 'Brustplatte', icon: '🛡️', slot: 'armour', type: 'armour'},
-  {id: 'helm', name: 'Helm', icon: '🪖', slot: 'armour', type: 'armour'},
-  {id: 'gloves', name: 'Handschuhe', icon: '🧤', slot: 'armour', type: 'armour'},
-  {id: 'boots', name: 'Stiefel', icon: '👢', slot: 'armour', type: 'armour'},
-  {id: 'ring1', name: 'Ring 1', icon: '💍', slot: 'accessory', type: 'accessory'},
-  {id: 'ring2', name: 'Ring 2', icon: '💍', slot: 'accessory', type: 'accessory'},
-  {id: 'amulet', name: 'Amulett', icon: '💎', slot: 'accessory', type: 'accessory'},
-  {id: 'belt', name: 'Gürtel', icon: '🪢', slot: 'accessory', type: 'accessory'}
+  {id: 'weapon', name: 'Waffe',       icon: '⚔️', accepts: 'weapon'},
+  {id: 'chest',  name: 'Brustplatte', icon: '🛡️', accepts: 'chest'},
+  {id: 'helm',   name: 'Helm',        icon: '🪖', accepts: 'helm'},
+  {id: 'gloves', name: 'Handschuhe',  icon: '🧤', accepts: 'gloves'},
+  {id: 'boots',  name: 'Stiefel',     icon: '👢', accepts: 'boots'},
+  {id: 'ring1',  name: 'Ring 1',      icon: '💍', accepts: 'ring'},
+  {id: 'ring2',  name: 'Ring 2',      icon: '💍', accepts: 'ring'},
+  {id: 'amulet', name: 'Amulett',     icon: '💎', accepts: 'amulet'},
+  {id: 'belt',   name: 'Gürtel',      icon: '🪢', accepts: 'belt'}
 ];
 
-// Base types for items
+// Base types for items, keyed by granular equip slot. Numeric stat fields
+// (str/dex/int/life/mana/es/armour/evasion/resistances/...) are IMPLICIT mods
+// that every item generated from that base carries regardless of rarity -
+// just like a PoE base type's implicit. `hands` (weapon only) drives the max
+// link cap; `damage`/`speed` are flavor-only (skill gems carry their own
+// damage independent of the weapon).
 const BASE_TYPES = {
   weapon: [
-    {name: "Rustic Sword", str: 5, dex: 2, int: 0, damage: 4, speed: 1.0, sockets: 2, hands: 1},
-    {name: "Goat's Horn", str: 8, dex: 0, int: 0, damage: 6, speed: 0.9, sockets: 0, hands: 1},
-    {name: "Simple Bow", str: 2, dex: 8, int: 0, damage: 5, speed: 1.1, sockets: 0, hands: 2},
-    {name: "Driftwood Wand", str: 0, dex: 2, int: 8, damage: 4, speed: 1.0, sockets: 0, hands: 1},
-    {name: "Iron Axe", str: 10, dex: 0, int: 0, damage: 7, speed: 0.8, sockets: 2, hands: 1},
-    {name: "Jagged Sword", str: 7, dex: 3, int: 0, damage: 5, speed: 1.0, sockets: 1, hands: 1}
+    {name: "Rustic Sword",    str: 5,  dex: 2,  damage: 4,  speed: 1.0,  hands: 1},
+    {name: "Goat's Horn",     str: 8,  damage: 6,  speed: 0.9,  hands: 1},
+    {name: "Jagged Sword",    str: 7,  dex: 3,  damage: 5,  speed: 1.0,  hands: 1},
+    {name: "Iron Axe",        str: 10, damage: 7,  speed: 0.8,  hands: 1},
+    {name: "Driftwood Wand",  dex: 2,  int: 8,  damage: 4,  speed: 1.0,  hands: 1},
+    {name: "Carved Wand",     int: 10, damage: 5,  speed: 1.05, hands: 1},
+    {name: "Simple Bow",      str: 2,  dex: 8,  damage: 5,  speed: 1.1,  hands: 2},
+    {name: "Long Bow",        dex: 12, damage: 8,  speed: 0.95, hands: 2},
+    {name: "Vaal Spike",      str: 14, damage: 10, speed: 0.7,  hands: 2},
+    {name: "Ancient Staff",   int: 14, damage: 9,  speed: 0.85, hands: 2, spellDamage: 8}
   ],
-  armour: [
-    {name: "Leather Vest", str: 3, dex: 3, int: 0, armour: 15, evasion: 10, sockets: 0},
-    {name: "Chainmail", str: 8, dex: 0, int: 0, armour: 30, evasion: 0, sockets: 0},
-    {name: "Silk Robe", str: 0, dex: 0, int: 8, armour: 5, es: 20, sockets: 0},
-    {name: "Plate Vest", str: 12, dex: 0, int: 0, armour: 40, evasion: 0, sockets: 3},
-    {name: "Studded Leather", str: 5, dex: 5, int: 0, armour: 25, evasion: 25, sockets: 2}
+  chest: [
+    {name: "Leather Vest",     str: 3,  dex: 3,  armour: 15, evasion: 10},
+    {name: "Chainmail",        str: 8,  armour: 30},
+    {name: "Silk Robe",        int: 8,  armour: 5,  es: 20},
+    {name: "Plate Vest",       str: 12, armour: 40},
+    {name: "Studded Leather",  str: 5,  dex: 5,  armour: 25, evasion: 25},
+    {name: "Shadow Garb",      dex: 8,  int: 4,  evasion: 28, es: 12},
+    {name: "Scale Hauberk",    str: 10, dex: 4,  armour: 35, evasion: 8}
   ],
-  accessory: [
-    {name: "Iron Ring", str: 2, dex: 0, int: 0, life: 5},
-    {name: "Sapphire Ring", str: 0, dex: 0, int: 4, mana: 10},
-    {name: "Ruby Ring", str: 4, dex: 0, int: 0, fireRes: 10},
-    {name: "Topaz Ring", str: 2, dex: 2, int: 0, lightningRes: 10},
-    {name: "Leather Belt", str: 3, dex: 3, int: 0, life: 10},
-    {name: "Amulet of Power", str: 2, dex: 2, int: 2, allDamage: 5}
+  helm: [
+    {name: "Leather Cap",      dex: 3,  evasion: 12, life: 8},
+    {name: "Iron Helm",        str: 6,  armour: 18},
+    {name: "Hood of Whispers", int: 5,  es: 14},
+    {name: "Visored Sallet",   str: 8,  dex: 2,  armour: 20, evasion: 6},
+    {name: "Wyrm Hat",         int: 8,  es: 18}
+  ],
+  gloves: [
+    {name: "Wrapped Mitts",    dex: 4,  evasion: 10},
+    {name: "Iron Gauntlets",   str: 6,  armour: 16},
+    {name: "Silk Gloves",      int: 5,  es: 10},
+    {name: "Strapped Mitts",   str: 4,  dex: 4,  armour: 14, evasion: 10}
+  ],
+  boots: [
+    {name: "Wool Shoes",       dex: 4,  evasion: 10, moveSpeed: 4},
+    {name: "Iron Greaves",     str: 6,  armour: 16, moveSpeed: 4},
+    {name: "Silk Slippers",    int: 5,  es: 10,  moveSpeed: 4},
+    {name: "Strapped Boots",   str: 4,  dex: 4,  armour: 14, evasion: 10, moveSpeed: 5}
+  ],
+  ring: [
+    {name: "Iron Ring",        str: 2,  life: 5},
+    {name: "Sapphire Ring",    int: 4,  mana: 10, coldRes: 8},
+    {name: "Ruby Ring",        str: 4,  fireRes: 8},
+    {name: "Topaz Ring",       dex: 2,  int: 2,  lightningRes: 8},
+    {name: "Coral Ring",       str: 3,  dex: 3,  life: 10}
+  ],
+  amulet: [
+    {name: "Amulet of Power",  str: 2,  dex: 2,  int: 2,  allDamage: 5},
+    {name: "Jade Amulet",      dex: 6,  evasion: 10},
+    {name: "Lapis Amulet",     int: 6,  es: 10},
+    {name: "Citrine Amulet",   str: 3,  dex: 3,  int: 3}
+  ],
+  belt: [
+    {name: "Leather Belt",     str: 3,  dex: 3,  life: 10},
+    {name: "Heavy Belt",       str: 8,  life: 15},
+    {name: "Chain Belt",       str: 4,  int: 4,  es: 8,  life: 8},
+    {name: "Studded Belt",     str: 6,  armour: 10, life: 12}
   ]
 };
 
-// Affixes
+// Affixes: [name, stat, label, min, max, tags?]. `tags` restricts which
+// granular equip slots the affix can roll on - omit for "any slot". Tiers
+// (T1 best .. T6 worst) are computed at roll time from a single shared scale
+// (AFFIX_TIER_COUNT/AFFIX_TIER_ILVL/AFFIX_TIER_WEIGHTS above), not stored per
+// affix, so every mod uses the same easy-to-read T1-T6 scale.
 const PREFIXES = [
-  ["Vital", "life", "Leben", 18, 130, 7],
-  ["Flaring", "flatPhys", "Physischer Schaden", 3, 38, 7],
-  ["Cruel", "incPhys", "Erhöhter physischer Schaden", 18, 170, 7],
-  ["Apprentice's", "spellDamage", "Zauberschaden", 12, 120, 7],
-  ["Pyromancer's", "fireDamage", "Feuerschaden", 12, 125, 7],
-  ["Cryomancer's", "coldDamage", "Kälteschaden", 12, 125, 7],
-  ["Stormcaller's", "lightningDamage", "Blitzschaden", 12, 125, 7],
-  ["Toxic", "chaosDamage", "Chaosschaden", 10, 110, 7],
-  ["Gladiator's", "armour", "Rüstung", 22, 220, 7],
-  ["Fox's", "evasion", "Ausweichen", 22, 220, 7],
-  ["Scholar's", "energyShield", "Energieschild", 18, 190, 7],
-  ["Commander", "minionDamage", "Dienerschaden", 14, 140, 7],
-  ["Tempered", "allDamage", "Globaler Schaden", 8, 85, 7]
+  ["Vital",          "life",            "Leben",                       18, 130],
+  ["Flaring",        "flatPhys",        "Flacher physischer Schaden",  3,  38,  SLOT_WEAPON],
+  ["Cruel",          "incPhys",         "Erhöhter physischer Schaden", 18, 170, SLOT_WEAPON],
+  ["Apprentice's",   "spellDamage",     "Zauberschaden",               12, 120, SLOT_WEAPON_AMULET_RING],
+  ["Pyromancer's",   "fireDamage",      "Feuerschaden",                12, 125, SLOT_WEAPON_AMULET_RING],
+  ["Cryomancer's",   "coldDamage",      "Kälteschaden",                12, 125, SLOT_WEAPON_AMULET_RING],
+  ["Stormcaller's",  "lightningDamage", "Blitzschaden",                12, 125, SLOT_WEAPON_AMULET_RING],
+  ["Toxic",          "chaosDamage",     "Chaosschaden",                10, 110, SLOT_WEAPON_AMULET_RING],
+  ["Gladiator's",    "armour",          "Rüstung",                     22, 220, SLOT_DEFENSE],
+  ["Fox's",          "evasion",         "Ausweichen",                  22, 220, SLOT_DEFENSE],
+  ["Scholar's",      "energyShield",    "Energieschild",               18, 190, SLOT_DEFENSE],
+  ["Commander",      "minionDamage",    "Dienerschaden",               14, 140, SLOT_WEAPON_AMULET],
+  ["Tempered",       "allDamage",       "Globaler Schaden",            8,  85,  SLOT_WEAPON_AMULET_RING],
+  ["Elementalist's", "elementalDamage", "Elementarschaden",            10, 100, SLOT_WEAPON_AMULET_RING],
+  ["Hunter's",       "projectileDamage","Projektilschaden",            10, 100, SLOT_WEAPON]
 ];
 
 const SUFFIXES = [
-  ["of the Volcano", "fireRes", "Feuerresistenz", 8, 48, 7],
-  ["of the Glacier", "coldRes", "Kälteresistenz", 8, 48, 7],
-  ["of the Storm", "lightningRes", "Blitzresistenz", 8, 48, 7],
-  ["of the Abyss", "chaosRes", "Chaosresistenz", 5, 35, 7],
-  ["of Ferocity", "attackSpeed", "Angriffsgeschwindigkeit", 4, 27, 7],
-  ["of the Sage", "castSpeed", "Zaubergeschwindigkeit", 4, 27, 7],
-  ["of Puncturing", "critChance", "Kritische Trefferchance", 10, 95, 7],
-  ["of Ruin", "critMulti", "Kritischer Multiplikator", 8, 65, 7],
-  ["of the Lynx", "dex", "Geschick", 8, 52, 7],
-  ["of the Bear", "str", "Stärke", 8, 52, 7],
-  ["of the Owl", "int", "Intelligenz", 8, 52, 7],
-  ["of the Cheetah", "moveSpeed", "Bewegungsgeschwindigkeit", 4, 30, 7],
-  ["of Plenty", "itemQuantity", "Item Quantity", 3, 24, 7],
-  ["of Treasure", "itemRarity", "Item Rarity", 8, 80, 7]
+  ["of the Volcano",  "fireRes",     "Feuerresistenz",             8,  48, SLOT_RESIST],
+  ["of the Glacier",  "coldRes",     "Kälteresistenz",             8,  48, SLOT_RESIST],
+  ["of the Storm",    "lightningRes","Blitzresistenz",             8,  48, SLOT_RESIST],
+  ["of the Abyss",    "chaosRes",    "Chaosresistenz",             5,  35, SLOT_RESIST],
+  ["of Ferocity",     "attackSpeed", "Angriffsgeschwindigkeit",    4,  27, SLOT_WEAPON_GLOVES],
+  ["of the Sage",     "castSpeed",   "Zaubergeschwindigkeit",      4,  27, SLOT_WEAPON_GLOVES],
+  ["of Puncturing",   "critChance",  "Kritische Trefferchance",    10, 95, SLOT_WEAPON],
+  ["of Ruin",         "critMulti",   "Kritischer Multiplikator",   8,  65, SLOT_WEAPON],
+  ["of the Lynx",     "dex",         "Geschick",                   8,  52],
+  ["of the Bear",     "str",         "Stärke",                     8,  52],
+  ["of the Owl",      "int",         "Intelligenz",                8,  52],
+  ["of the Cheetah",  "moveSpeed",   "Bewegungsgeschwindigkeit",   4,  30, SLOT_BOOTS],
+  ["of Plenty",       "itemQuantity","Item Quantity",              3,  24, SLOT_JEWELRY],
+  ["of Treasure",     "itemRarity",  "Item Rarity",                8,  80, SLOT_JEWELRY],
+  ["of the Mind",     "manaRegen",   "Manaregeneration",           8,  60],
+  ["of the Wanderer", "allRes",      "Alle Resistenzen",           4,  20, SLOT_RESIST]
+];
+
+// Unique items - PoE-inspired, each tied to a fixed equip slot + base type so
+// they can never roll into the wrong paper-doll slot, with a small fixed roll
+// range per mod (rolled once at creation, like a real PoE unique).
+const UNIQUE_ITEMS = [
+  // ---- Weapons ----
+  {name: "Starforge", equipSlot: 'weapon', base: "Vaal Spike", icon: '⚔️',
+    description: "Eine uralte Klinge, geschmiedet aus dem Herzen eines gefallenen Sterns.",
+    mods: {incPhys: [120, 160], allDamage: [15, 25], life: [80, 120], attackSpeed: [10, 15]}},
+  {name: "The Searing Touch", equipSlot: 'weapon', base: "Ancient Staff", icon: '🔥',
+    description: "Ein Stab, dessen Spitze ewig in weißglühender Flamme brennt.",
+    mods: {fireDamage: [80, 120], castSpeed: [15, 20], spellDamage: [30, 50]}},
+  {name: "Voltaxic Rift", equipSlot: 'weapon', base: "Long Bow", icon: '⚡',
+    description: "Pfeile aus diesem Bogen schlagen ein wie der Zorn des Himmels.",
+    mods: {lightningDamage: [90, 130], projectileDamage: [40, 60], critChance: [20, 30]}},
+  {name: "Windripper", equipSlot: 'weapon', base: "Simple Bow", icon: '❄️',
+    description: "So leicht, dass der Schuss schneller ankommt als der Wind selbst.",
+    mods: {critChance: [30, 40], attackSpeed: [20, 25], coldDamage: [40, 60]}},
+  // ---- Chest ----
+  {name: "Kaom's Heart", equipSlot: 'chest', base: "Chainmail", icon: '🛡️',
+    description: "Der Brustpanzer eines Karui-Häuptlings, geschmiedet im Feuer des Krieges.",
+    mods: {life: [300, 400], fireDamage: [20, 30]}},
+  {name: "Tabula Rasa", equipSlot: 'chest', base: "Leather Vest", icon: '⬜',
+    description: "Ein unscheinbares Gewand - reiner, ungebundener Sockelraum.",
+    mods: {}, forcedSockets: 6},
+  {name: "Shavronne's Wrappings", equipSlot: 'chest', base: "Silk Robe", icon: '💜',
+    description: "Umhüllt seinen Träger in einem Schild aus reiner Energie.",
+    mods: {es: [150, 220], chaosRes: [30, 40], allDamage: [10, 15]}},
+  {name: "Belly of the Beast", equipSlot: 'chest', base: "Plate Vest", icon: '💀',
+    description: "Gegerbt aus der Haut eines Ungeheuers, das niemand je fallen sah.",
+    mods: {life: [200, 260], armour: [100, 150]}},
+  // ---- Helm ----
+  {name: "Goldrim", equipSlot: 'helm', base: "Leather Cap", icon: '🪖',
+    description: "Schäbig anzusehen, doch von überraschender Schutzkraft.",
+    mods: {life: [15, 25], allRes: [20, 30], itemRarity: [15, 25]}},
+  {name: "The Baron", equipSlot: 'helm', base: "Iron Helm", icon: '👑',
+    description: "Getragen von einem Feldherrn, dessen Diener ihn nie verließen.",
+    mods: {str: [30, 40], life: [60, 90], minionDamage: [30, 40]}},
+  {name: "Diadem of the Seer", equipSlot: 'helm', base: "Hood of Whispers", icon: '🔮',
+    description: "Wer es trägt, sieht den kritischen Punkt jedes Gegners.",
+    mods: {int: [25, 35], spellDamage: [25, 35], critChance: [10, 15]}},
+  // ---- Gloves ----
+  {name: "Facebreaker", equipSlot: 'gloves', base: "Iron Gauntlets", icon: '👊',
+    description: "Fäuste aus Eisen - wozu eine Waffe, wenn die Hand genügt?",
+    mods: {flatPhys: [50, 70], str: [20, 30], life: [40, 60]}},
+  {name: "Aurora's Embrace", equipSlot: 'gloves', base: "Silk Gloves", icon: '✨',
+    description: "Handschuhe, gewoben aus erstarrtem Mondlicht.",
+    mods: {es: [40, 60], castSpeed: [12, 18], int: [20, 30]}},
+  // ---- Boots ----
+  {name: "Wanderlust", equipSlot: 'boots', base: "Wool Shoes", icon: '🥾',
+    description: "Diese Stiefel kennen nur ein Ziel: das nächste.",
+    mods: {moveSpeed: [15, 20], life: [10, 20]}},
+  {name: "Seven-League Step", equipSlot: 'boots', base: "Strapped Boots", icon: '👢',
+    description: "Jeder Schritt verschlingt den Weg von sieben.",
+    mods: {moveSpeed: [25, 35], evasion: [40, 60]}},
+  {name: "Atziri's Step", equipSlot: 'boots', base: "Silk Slippers", icon: '🌙',
+    description: "Lautlose Schritte einer Königin, die niemand kommen hört.",
+    mods: {es: [30, 50], evasion: [30, 50], moveSpeed: [10, 15]}},
+  // ---- Rings ----
+  {name: "The Taming", equipSlot: 'ring', base: "Coral Ring", icon: '🐺',
+    description: "Geschmiedet aus dem Reißzahn eines Wolfs, der den Winter überlebte.",
+    mods: {coldDamage: [15, 25], lightningDamage: [15, 25], life: [20, 30]}},
+  {name: "Le Heup of All", equipSlot: 'ring', base: "Iron Ring", icon: '💍',
+    description: "Ein bisschen von allem ist manchmal genau richtig.",
+    mods: {str: [10, 15], dex: [10, 15], int: [10, 15], allDamage: [5, 10]}},
+  {name: "Doedre's Damning", equipSlot: 'ring', base: "Sapphire Ring", icon: '☠️',
+    description: "Ein Fluch in Ringform, geschmiedet von einer verbannten Hexe.",
+    mods: {chaosDamage: [30, 45], itemRarity: [10, 20]}},
+  // ---- Amulets ----
+  {name: "Presence of Chayula", equipSlot: 'amulet', base: "Lapis Amulet", icon: '🟣',
+    description: "Das Auge eines schlafenden Gottes ruht an dieser Kette.",
+    mods: {life: [40, 60], es: [30, 50], allRes: [10, 20]}},
+  {name: "Watcher's Eye", equipSlot: 'amulet', base: "Citrine Amulet", icon: '👁️',
+    description: "Es beobachtet jede Regung deiner Macht - und verstärkt sie.",
+    mods: {allDamage: [15, 25], life: [40, 60], manaRegen: [20, 30]}},
+  {name: "Bisco's Collar", equipSlot: 'amulet', base: "Jade Amulet", icon: '🐗',
+    description: "Ein Glücksbringer, der Beute förmlich anzuziehen scheint.",
+    mods: {itemRarity: [40, 60], itemQuantity: [20, 30], dex: [15, 25]}},
+  // ---- Belts ----
+  {name: "Headhunter", equipSlot: 'belt', base: "Leather Belt", icon: '🎯',
+    description: "Jeder erlegte Anführer hinterlässt ein Stück seiner Macht in diesem Gürtel.",
+    mods: {life: [60, 90], itemRarity: [20, 30], allDamage: [10, 15]}},
+  {name: "Meginord's Girdle", equipSlot: 'belt', base: "Heavy Belt", icon: '🪢',
+    description: "Ein Gürtel von rohem, unbändigem Kraftaufwand.",
+    mods: {str: [20, 30], life: [60, 80]}},
+  {name: "Doryani's Invitation", equipSlot: 'belt', base: "Chain Belt", icon: '🌩️',
+    description: "Ein Geschenk des Elementarfürsten - Macht über alle drei Elemente.",
+    mods: {fireDamage: [20, 30], coldDamage: [20, 30], lightningDamage: [20, 30], allRes: [8, 12]}}
 ];
 
 // Skill Gems
@@ -555,10 +737,10 @@ const ZONES = [
 
 // Bosses
 const BOSSES = {
-  Shaper: {lvl: 78, hp: 15000, damage: 400, rewards: ["Starforge", "Void Battery"], splinter: "Shaper Splinter", description: "Der Shaper - Herrscher der Form"},
+  Shaper: {lvl: 78, hp: 15000, damage: 400, rewards: ["Starforge", "Voltaxic Rift"], splinter: "Shaper Splinter", description: "Der Shaper - Herrscher der Form"},
   Elder: {lvl: 80, hp: 18000, damage: 450, rewards: ["Watcher's Eye", "Shavronne's Wrappings"], splinter: "Elder Splinter", description: "Der Elder - Verderber der Realität"},
-  Sirus: {lvl: 83, hp: 22000, damage: 550, rewards: ["Thread of Hope", "The Searing Touch"], splinter: "Sirus Splinter", description: "Sirus - der Wächter der Erinnerung"},
-  Maven: {lvl: 84, hp: 25000, damage: 600, rewards: ["Unnatural Instinct", "The Taming"], splinter: "Maven Splinter", description: "Die Maven - Meisterin der Arena"},
+  Sirus: {lvl: 83, hp: 22000, damage: 550, rewards: ["The Searing Touch", "Doryani's Invitation"], splinter: "Sirus Splinter", description: "Sirus - der Wächter der Erinnerung"},
+  Maven: {lvl: 84, hp: 25000, damage: 600, rewards: ["The Taming", "Headhunter"], splinter: "Maven Splinter", description: "Die Maven - Meisterin der Arena"},
   UberElder: {lvl: 85, hp: 30000, damage: 700, rewards: ["Watcher's Eye", "Starforge", "Presence of Chayula"], splinter: "Uber Elder Splinter", description: "Uber Elder - Die ultimative Bedrohung"}
 };
 

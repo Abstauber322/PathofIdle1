@@ -634,10 +634,8 @@ function onNamedBossDefeated(bossName) {
 
   addToLog(`👑 ${bossName} besiegt!`, 'drop');
   if (boss && Math.random() < 0.5 && state.inventory.length < INVENTORY_CAP) {
-    const slot = pick(['weapon', 'armour', 'accessory']);
-    const item = createItem({slot: slot, level: boss.lvl, rarity: 'unique'});
-    item.name = pick(boss.rewards);
-    item.description = boss.description;
+    const uniqueName = pick(boss.rewards);
+    const item = createItem({level: boss.lvl, rarity: 'unique', uniqueName: uniqueName});
     state.inventory.push(item);
     addToLog(`🎁 Einzigartiger Gegenstand erhalten: ${item.name}!`, 'drop');
   }

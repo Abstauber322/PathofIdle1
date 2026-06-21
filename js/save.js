@@ -47,10 +47,49 @@ function loadGame() {
     (data.stash || []).forEach(norm);
     Object.values(data.equipment || {}).forEach(norm);
 
+    // Migration v4: the old equipment system let any "accessory" item (ring,
+    // amulet, belt - they were never distinguished) be equipped into ANY
+    // accessory slot. This backfills a real, granular equipSlot on every item
+    // and un-equips anything currently sitting in the wrong paper-doll slot.
+    if (!data.version || data.version < 4) {
+      const fixed = migrateItemEquipSlots(data);
+      data.version = 4;
+      if (fixed > 0) data._equipSlotFixNotice = fixed;
+    }
+
     return data;
   } catch {
     return null;
   }
+}
+
+// Shared by loadGame()/importGame(): ensures every item (inventory, stash,
+// equipped) has a valid granular equipSlot, then moves any equipped item that
+// turns out to be in the wrong paper-doll slot back into the inventory.
+// Returns how many items were unequipped this way.
+function migrateItemEquipSlots(data) {
+  const fixItem = (it) => {
+    if (!it || it.type !== 'item') return;
+    const inferred = inferEquipSlot(it);
+    if (inferred) it.equipSlot = inferred;
+  };
+  (data.inventory || []).forEach(fixItem);
+  (data.stash || []).forEach(fixItem);
+  Object.values(data.equipment || {}).forEach(fixItem);
+
+  let fixedCount = 0;
+  if (data.equipment) {
+    data.inventory = data.inventory || [];
+    EQUIPMENT_SLOTS.forEach(slotDef => {
+      const it = data.equipment[slotDef.id];
+      if (it && it.equipSlot && it.equipSlot !== slotDef.accepts) {
+        data.inventory.push(it);
+        data.equipment[slotDef.id] = null;
+        fixedCount++;
+      }
+    });
+  }
+  return fixedCount;
 }
 
 function newGame() {
@@ -109,6 +148,11 @@ function importGame() {
     }
     if (!state.maps) state.maps = [];
     if (!state.bossSplinters) state.bossSplinters = {};
+    if (!state.version || state.version < 4) {
+      const fixed = migrateItemEquipSlots(state);
+      state.version = 4;
+      if (fixed > 0) state._equipSlotFixNotice = fixed;
+    }
 
     // Hide class selection
     el('section-char-select').classList.add('hidden');
@@ -161,7 +205,7 @@ function startIdleMode() {
 
       // Random item drop
       if (Math.random() < 0.05) {
-        const slot = pick(['weapon', 'armour', 'accessory']);
+        const slot = pick(EQUIP_SLOT_KEYS);
         const item = createItem({slot: slot, level: state.level});
         if (state.inventory.length < INVENTORY_CAP) {
           state.inventory.push(item);

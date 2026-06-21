@@ -32,6 +32,11 @@ function init() {
     updateGoldDisplay();
     if (typeof updateNavCombatState === 'function') updateNavCombatState();
     addToLog(`Willkommen zurück, ${state.name}!`, 'system');
+    if (state._equipSlotFixNotice) {
+      addToLog(`🔧 Ausrüstungssystem aktualisiert: ${state._equipSlotFixNotice} falsch sitzende(s) Item(s) wurden zurück ins Inventar gelegt.`, 'system');
+      delete state._equipSlotFixNotice;
+      saveGame();
+    }
   } else {
     // Show class selection
     showSection('char-select');

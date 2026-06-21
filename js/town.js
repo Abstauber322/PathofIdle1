@@ -100,7 +100,7 @@ function renderVendor() {
   itemContainer.innerHTML = '';
 
   for (let i = 0; i < 6; i++) {
-    const slot = pick(['weapon', 'armour', 'accessory']);
+    const slot = pick(EQUIP_SLOT_KEYS);
     const rarity = pickWeighted([
       {value: 'normal', weight: 60},
       {value: 'magic', weight: 25},
@@ -383,7 +383,7 @@ function buyVendorItem(itemId, cost) {
 
   // Find item in vendor (simplified - in real implementation we'd track vendor stock)
   // For now, just create a new item
-  const slot = pick(['weapon', 'armour', 'accessory']);
+  const slot = pick(EQUIP_SLOT_KEYS);
   const rarity = pickWeighted([
     {value: 'normal', weight: 60},
     {value: 'magic', weight: 25},
@@ -518,11 +518,10 @@ const CRAFTING_CURRENCIES = [
     reason: item => item.rarity === 'normal' ? '' : 'Nur für normale Items',
     apply: item => {
       item.rarity = 'magic';
-      item.name = generateRareName(item.base, 'magic');
       item.affixes = [];
-      item.mods = {};
-      if (item.type === 'map') addRandomMapMods(item, rnd(1, 2));
-      else addRandomAffixes(item, rnd(1, 2));
+      rebuildItemMods(item);
+      if (item.type === 'map') { addRandomMapMods(item, rnd(1, 2)); item.name = generateRareName(item.base, 'magic'); }
+      else { addRandomAffixes(item, rnd(1, 2)); item.name = buildMagicName(item); }
     },
     message: item => `🔵 ${item.name} zu Magic aufgewertet!`
   },
@@ -545,7 +544,7 @@ const CRAFTING_CURRENCIES = [
       item.rarity = 'rare';
       item.name = generateRareName(item.base, 'rare');
       item.affixes = [];
-      item.mods = {};
+      rebuildItemMods(item);
       if (item.type === 'map') addRandomMapMods(item, rnd(4, 6));
       else addRandomAffixes(item, rnd(4, 6));
     },
@@ -560,7 +559,7 @@ const CRAFTING_CURRENCIES = [
     apply: item => {
       item.name = generateRareName(item.base, 'rare');
       item.affixes = [];
-      item.mods = {};
+      rebuildItemMods(item);
       if (item.type === 'map') addRandomMapMods(item, rnd(4, 6));
       else addRandomAffixes(item, rnd(4, 6));
     },
@@ -631,7 +630,10 @@ function consumeCurrency(name, amount = 1) {
 // Rerolls the numeric value of every existing affix on an item, keeping the
 // affixes themselves (used by Divine Orb).
 function rerollAffixValues(item) {
+  // Seed mods with implicits only - the loop below adds each affix's freshly
+  // rolled value, so pre-seeding with the OLD affix values here would double-count.
   item.mods = {};
+  (item.implicits || []).forEach(im => { item.mods[im.stat] = (item.mods[im.stat] || 0) + im.value; });
   item.affixes.forEach(affix => {
     if (item.type === 'map') {
       const src = MAP_MOD_POOL.find(m => m.stat === affix.stat);
@@ -644,11 +646,10 @@ function rerollAffixValues(item) {
     } else {
       const source = [...PREFIXES, ...SUFFIXES].find(a => a[1] === affix.stat);
       if (source) {
-        const [, , , min, max, tiers] = source;
-        const tier = affix.tier || 1;
-        const tMin = Math.round(min + (max - min) * ((tier - 1) / tiers));
-        const tMax = Math.round(min + (max - min) * (tier / tiers));
-        affix.value = rnd(tMin, Math.max(tMin, tMax));
+        const [, , , min, max] = source;
+        const tier = affix.tier || AFFIX_TIER_COUNT;
+        const [lo, hi] = tierValueRange(min, max, tier);
+        affix.value = rnd(lo, hi);
       }
     }
     item.mods[affix.stat] = (item.mods[affix.stat] || 0) + affix.value;

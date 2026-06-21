@@ -174,14 +174,14 @@ function createBlankState(cls, name) {
         base: "Rustic Sword",
         rarity: 'Normal',
         level: 1,
-        slot: slot.slot
+        slot: slot.accepts
       });
     } else if (slot.id === 'chest') {
       const chest = createItem({
         base: "Leather Vest",
         rarity: 'Normal',
         level: 1,
-        slot: slot.slot
+        slot: slot.accepts
       });
       chest.sockets = createSockets(3, attrs);
       chest.links = createLinks(chest.sockets.length);

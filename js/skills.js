@@ -500,10 +500,10 @@ function useGemSkillEff(gem, eff, item) {
     const scale = (SKILL_GEMS[gem.name] || {}).scale || {};
     Object.entries(scale).forEach(([attr, f]) => { damage += Math.floor((state.attrs[attr]||0) * f); });
   }
-  if (state.equipment.weapon) {
-    const w = state.equipment.weapon;
-    if (w.incPhys) damage += Math.floor(damage * w.incPhys / 100);
-    if (w.allDamage) damage += Math.floor(damage * w.allDamage / 100);
+  if (state.equipment.weapon && state.equipment.weapon.mods) {
+    const wm = state.equipment.weapon.mods;
+    if (wm.incPhys) damage += Math.floor(damage * wm.incPhys / 100);
+    if (wm.allDamage) damage += Math.floor(damage * wm.allDamage / 100);
   }
   const tags = eff.tags || (SKILL_GEMS[gem.name] && SKILL_GEMS[gem.name].tags) || [];
   if (tags.includes('Fire')) damage += Math.floor(damage * (stats.fireDamage||0) / 100);
@@ -511,6 +511,8 @@ function useGemSkillEff(gem, eff, item) {
   if (tags.includes('Lightning')) damage += Math.floor(damage * (stats.lightningDamage||0) / 100);
   if (tags.includes('Chaos')) damage += Math.floor(damage * (stats.chaosDamage||0) / 100);
   if (tags.includes('Physical')) damage += Math.floor(damage * (stats.physicalDamage||0) / 100);
+  if (tags.includes('Fire') || tags.includes('Cold') || tags.includes('Lightning')) damage += Math.floor(damage * (stats.elementalDamage||0) / 100);
+  if (tags.includes('Projectile')) damage += Math.floor(damage * (stats.projectileDamage||0) / 100);
   if (tags.includes('Attack') && stats.attackSpeed) damage += Math.floor(damage * stats.attackSpeed / 100);
 
   const critChance = Math.min(95, (stats.critChance||0) + (eff.crit||0));

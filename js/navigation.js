@@ -151,7 +151,7 @@ function createItemTooltip(item) {
     html += `<p style="color:#ff6666;margin:0 0 8px 0;">❔ Unidentifiziert</p>`;
   }
 
-  if (item.rarity === 'Unique') {
+  if (item.rarity === 'unique') {
     html += `<p style="color:#ffd700;margin:0 0 8px 0;font-style:italic;">${item.description || ''}</p>`;
   }
 
@@ -180,14 +180,26 @@ function createItemTooltip(item) {
       html += `<p style="color:#ff6666;margin:0;font-style:italic;">Modifikatoren erst nach Identifikation sichtbar.</p>`;
       html += `<p style="color:#aaa;margin:4px 0 0 0;font-size:11px;">Benutze ein Scroll of Wisdom.</p>`;
       html += `</div>`;
-    } else if (item.affixes && item.affixes.length > 0) {
-      html += `<div style="margin-top:8px;border-top:1px solid #333;padding-top:8px;">`;
-      html += `<p style="color:#aaa;margin:0 0 4px 0;">Modifikatoren:</p>`;
-      item.affixes.forEach(affix => {
-        const sign = affix.value >= 0 ? '+' : '';
-        html += `<p class="mod positive" style="margin:0;">${affix.label}: ${sign}${affix.value}</p>`;
-      });
-      html += `</div>`;
+    } else {
+      if (item.implicits && item.implicits.length > 0) {
+        html += `<div style="margin-top:8px;border-top:1px solid #333;padding-top:8px;">`;
+        html += `<p style="color:#aaa;margin:0 0 4px 0;">Implizit:</p>`;
+        item.implicits.forEach(im => {
+          const sign = im.value >= 0 ? '+' : '';
+          html += `<p class="mod" style="margin:0;color:#9a9aff;font-style:italic;">${im.label}: ${sign}${im.value}</p>`;
+        });
+        html += `</div>`;
+      }
+      if (item.affixes && item.affixes.length > 0) {
+        html += `<div style="margin-top:8px;border-top:1px solid #333;padding-top:8px;">`;
+        html += `<p style="color:#aaa;margin:0 0 4px 0;">Modifikatoren:</p>`;
+        item.affixes.forEach(affix => {
+          const sign = affix.value >= 0 ? '+' : '';
+          const tierTag = affix.tier ? ` <span style="color:${tierColor(affix.tier)};font-weight:bold;">[T${affix.tier}]</span>` : '';
+          html += `<p class="mod positive" style="margin:0;">${affix.label}: ${sign}${affix.value}${tierTag}</p>`;
+        });
+        html += `</div>`;
+      }
     }
 
     // Socket + link info
@@ -226,7 +238,7 @@ function createItemTooltip(item) {
   }
 
   if (item.slot) {
-    html += `<p style="color:#aaa;margin:8px 0 0 0;font-size:12px;">Slot: ${getSlotName(item.slot)}</p>`;
+    html += `<p style="color:#aaa;margin:8px 0 0 0;font-size:12px;">Slot: ${getSlotName(item.equipSlot || item.slot)}</p>`;
   }
 
   return html;
@@ -271,6 +283,13 @@ function getItemIcon(item) {
   if (item.type === 'gem') return item.icon || ICONS.gem;
   if (item.type === 'map') return ICONS.map;
 
+  const equipIcons = {
+    weapon: ICONS.weapon, chest: ICONS.chest, helm: ICONS.helm,
+    gloves: ICONS.gloves, boots: ICONS.boots,
+    ring: ICONS.ring, amulet: ICONS.amulet, belt: ICONS.belt
+  };
+  if (item.equipSlot && equipIcons[item.equipSlot]) return equipIcons[item.equipSlot];
+
   const slotIcons = {
     weapon: ICONS.weapon,
     armour: ICONS.armour,
@@ -281,6 +300,7 @@ function getItemIcon(item) {
 }
 
 function getSlotName(slot) {
+  if (EQUIP_SLOT_NAMES[slot]) return EQUIP_SLOT_NAMES[slot];
   const names = {
     weapon: 'Waffe',
     armour: 'Rüstung',
@@ -305,6 +325,7 @@ function getStatLabel(stat) {
     lightningDamage: "Blitzschaden",
     chaosDamage: "Chaosschaden",
     physicalDamage: "Physischer Schaden",
+    flatPhys: "Physischer Schaden",
     incPhys: "Erhöhter physischer Schaden",
     attackSpeed: "Angriffsgeschwindigkeit",
     castSpeed: "Zaubergeschwindigkeit",

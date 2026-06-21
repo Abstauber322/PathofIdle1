@@ -56,7 +56,6 @@ function addRandomMapMods(item, count) {
 
 function createItem(opts = {}) {
   const level = opts.level || 1;
-  const slot = opts.slot || pick(['weapon', 'armour', 'accessory']);
   const rarity = String(opts.rarity || pickWeighted([
     {value: 'normal', weight: 60},
     {value: 'magic', weight: 25},
@@ -64,19 +63,45 @@ function createItem(opts = {}) {
     {value: 'unique', weight: 5}
   ])).toLowerCase();
 
-  let base;
-  if (opts.base) {
-    base = BASE_TYPES[slot].find(b => b.name === opts.base) || pick(BASE_TYPES[slot]);
-  } else {
-    base = pick(BASE_TYPES[slot]);
+  let equipSlot = normalizeEquipSlot(opts.slot) || pick(EQUIP_SLOT_KEYS);
+
+  // Resolve a unique definition up front - a named/forced unique (e.g. a boss
+  // reward) can require a different slot than the one initially picked, so
+  // the final equipSlot/base have to follow the unique, not the other way round.
+  let uniqueDef = null;
+  if (rarity === 'unique') {
+    if (opts.uniqueName) uniqueDef = UNIQUE_ITEMS.find(u => u.name === opts.uniqueName);
+    if (!uniqueDef) {
+      const pool = UNIQUE_ITEMS.filter(u => u.equipSlot === equipSlot);
+      uniqueDef = pool.length ? pick(pool) : pick(UNIQUE_ITEMS);
+    }
+    if (uniqueDef) equipSlot = uniqueDef.equipSlot;
   }
 
+  const category = EQUIP_SLOT_CATEGORY[equipSlot] || 'armour';
+
+  let base;
+  if (uniqueDef) {
+    base = (BASE_TYPES[equipSlot] || []).find(b => b.name === uniqueDef.base) || (BASE_TYPES[equipSlot] || [])[0];
+  } else if (opts.base) {
+    base = (BASE_TYPES[equipSlot] || []).find(b => b.name === opts.base) || pick(BASE_TYPES[equipSlot]);
+  } else {
+    base = pick(BASE_TYPES[equipSlot]);
+  }
+
+  // NOTE: ...base is spread BEFORE the explicit fields below on purpose - base
+  // type objects carry their own `name` key, and spreading them after would
+  // silently overwrite any rarity-specific name we set (that was a real bug
+  // in the old generator: magic/rare names were computed, then immediately
+  // discarded).
   const item = {
     id: uid(),
     type: 'item',
-    name: rarity === 'normal' ? base.name : generateRareName(base.name, rarity),
+    ...base,
+    name: base.name,
     base: base.name,
-    slot: slot,
+    slot: category,
+    equipSlot: equipSlot,
     rarity: rarity,
     level: level,
     itemLevel: level,
@@ -84,38 +109,128 @@ function createItem(opts = {}) {
     sockets: [],
     links: [],
     affixes: [],
-    mods: {},
-    ...base,
-    icon: getItemIcon({type: slot === 'jewel' ? 'jewel' : 'item', slot: slot})
+    implicits: [],
+    mods: {}
   };
+  item.icon = getItemIcon(item);
 
-  // Add affixes based on rarity
-  if (rarity === 'magic') {
-    addRandomAffixes(item, rnd(1, 2));
-  } else if (rarity === 'rare') {
-    addRandomAffixes(item, rnd(4, 6));
-  } else if (rarity === 'unique') {
-    // Unique items have special properties
-    item.name = pickUniqueName(slot);
-    item.mods = getUniqueMods(slot);
-    item.affixes = Object.entries(item.mods).map(([stat, value]) => ({
-      stat: stat,
-      value: value,
-      label: getStatLabel(stat)
-    }));
-    item.description = getUniqueDescription(slot);
+  // Implicit base-type stats (e.g. a Ruby Ring's built-in fire resistance)
+  // apply to every rarity except uniques, which define their own complete,
+  // self-contained kit of mods.
+  if (!uniqueDef) {
+    const META_KEYS = ['name', 'hands', 'sockets', 'damage', 'speed'];
+    Object.entries(base).forEach(([k, v]) => {
+      if (META_KEYS.includes(k) || typeof v !== 'number' || v === 0) return;
+      item.implicits.push({stat: k, value: v, label: getStatLabel(k)});
+      item.mods[k] = (item.mods[k] || 0) + v;
+    });
   }
 
-  // Add sockets based on slot and level
-  if (slot !== 'accessory' && slot !== 'jewel') {
-    const socketCount = getSocketCount(rarity, slot, level, base.hands);
-    if (socketCount > 0) {
-      item.sockets = createSockets(socketCount, state ? state.attrs : {str: 1, dex: 1, int: 1});
-      item.links = createLinks(socketCount, getItemMaxLinks(item));
+  // Add affixes / unique mods based on rarity
+  if (rarity === 'magic') {
+    addRandomAffixes(item, rnd(1, 2));
+    item.name = buildMagicName(item);
+  } else if (rarity === 'rare') {
+    addRandomAffixes(item, rnd(4, 6));
+    item.name = generateRareName(base.name, 'rare');
+  } else if (rarity === 'unique') {
+    if (uniqueDef) {
+      item.name = uniqueDef.name;
+      if (uniqueDef.icon) item.icon = uniqueDef.icon;
+      const rolled = rollUniqueMods(uniqueDef);
+      Object.entries(rolled).forEach(([stat, value]) => {
+        item.mods[stat] = (item.mods[stat] || 0) + value;
+      });
+      item.affixes = Object.entries(rolled).map(([stat, value]) => ({
+        stat: stat, value: value, label: getStatLabel(stat)
+      }));
+      item.description = uniqueDef.description;
+    } else {
+      // Should not normally happen (UNIQUE_ITEMS always has entries for every
+      // slot), but keep a harmless fallback so item generation never breaks.
+      item.name = `Uraltes ${base.name}`;
+      item.description = "Ein einzigartiger Gegenstand mit besonderen Eigenschaften.";
+    }
+  }
+
+  // Sockets (weapon & armour pieces only - jewelry never has sockets, PoE-style)
+  if (category !== 'accessory') {
+    if (uniqueDef && uniqueDef.forcedSockets) {
+      const n = uniqueDef.forcedSockets;
+      item.sockets = createSockets(n, state ? state.attrs : {str: 1, dex: 1, int: 1});
+      item.sockets.forEach(s => { s.color = 'white'; });
+      item.links = [n];
+    } else {
+      const socketCount = getSocketCount(rarity, category, level, base.hands);
+      if (socketCount > 0) {
+        item.sockets = createSockets(socketCount, state ? state.attrs : {str: 1, dex: 1, int: 1});
+        item.links = createLinks(socketCount, getItemMaxLinks(item));
+      }
     }
   }
 
   return item;
+}
+
+// Resolves any slot value (granular key, legacy broad category, or nothing)
+// into a concrete granular equip slot key.
+function normalizeEquipSlot(slotValue) {
+  if (!slotValue) return null;
+  if (EQUIP_SLOT_KEYS.includes(slotValue)) return slotValue;
+  if (slotValue === 'armour') return pick(['chest', 'helm', 'gloves', 'boots']);
+  if (slotValue === 'accessory') return pick(['ring', 'amulet', 'belt']);
+  return null;
+}
+
+// Best-effort recovery of an item's granular equip slot for items that
+// predate the equipSlot field (old save data) - tries the unique table, then
+// the base type name, then falls back to a random slot within the old broad
+// category so the item is never permanently stuck unequippable.
+function inferEquipSlot(item) {
+  if (!item) return null;
+  if (item.equipSlot && EQUIP_SLOT_KEYS.includes(item.equipSlot)) return item.equipSlot;
+  const uniqueDef = UNIQUE_ITEMS.find(u => u.name === item.name);
+  if (uniqueDef) return uniqueDef.equipSlot;
+  if (item.base) {
+    for (const key of EQUIP_SLOT_KEYS) {
+      if ((BASE_TYPES[key] || []).some(b => b.name === item.base)) return key;
+    }
+  }
+  if (item.slot === 'weapon') return 'weapon';
+  if (item.slot === 'armour') return pick(['chest', 'helm', 'gloves', 'boots']);
+  if (item.slot === 'accessory') return pick(['ring', 'amulet', 'belt']);
+  return null;
+}
+
+// Rolls a fresh set of stat values for a unique item definition (each mod is
+// a [min, max] range, rolled once per item instance).
+function rollUniqueMods(uniqueDef) {
+  const mods = {};
+  Object.entries(uniqueDef.mods || {}).forEach(([stat, range]) => {
+    const [mn, mx] = Array.isArray(range) ? range : [range, range];
+    mods[stat] = rnd(mn, mx);
+  });
+  return mods;
+}
+
+// Builds a magic item's name directly from its rolled prefix/suffix, PoE-style
+// ("Vital Rustic Sword of the Volcano"), instead of an unrelated flavor word.
+function buildMagicName(item) {
+  const p = item.affixes.find(a => a.affixType === 'prefix');
+  const s = item.affixes.find(a => a.affixType === 'suffix');
+  let name = item.base;
+  if (p) name = `${p.name} ${name}`;
+  if (s) name = `${name} ${s.name}`;
+  return name;
+}
+
+// Rebuilds item.mods from scratch out of its implicits + current affixes -
+// used whenever crafting currency rerolls/replaces affixes, so the item's
+// base-type implicit is never accidentally wiped along with the affixes.
+function rebuildItemMods(item) {
+  item.mods = {};
+  (item.implicits || []).forEach(im => { item.mods[im.stat] = (item.mods[im.stat] || 0) + im.value; });
+  (item.affixes || []).forEach(af => { item.mods[af.stat] = (item.mods[af.stat] || 0) + af.value; });
 }
 
 function createGem(name, type) {
@@ -258,99 +373,78 @@ function generateRareName(base, rarity) {
   return base;
 }
 
-function pickUniqueName(slot) {
-  const names = {
-    weapon: ["Kaom's Heart", "Headhunter", "The Searing Touch", "Quill Rain", "Void Battery", "Starforge", "Atziri's Disfavour", "Windripper", "Mjolner", "Cospri's Malice", "Voltaxic Rift"],
-    armour: ["Tabula Rasa", "Goldrim", "Wanderlust", "Shavronne's Wrappings", "The Baron", "Facebreaker", "Queen of the Forest", "Belly of the Beast", "Carcass Jack", "Aegis Aurora"],
-    accessory: ["Headhunter", "Kaom's Heart", "Presence of Chayula", "Watcher's Eye", "Thread of Hope", "The Taming", "Ming's Heart", "Bisco's Collar", "Carnage Heart"]
-  };
+// (Unique items are now generated directly from the UNIQUE_ITEMS table in
+// data.js - see createItem()/rollUniqueMods() - instead of being assembled
+// from a generic random stat pool per broad category.)
 
-  return pick(names[slot] || names.weapon);
-}
-
-function getUniqueDescription(slot) {
-  const descriptions = {
-    weapon: "Eine legendäre Waffe mit einzigartigen Eigenschaften.",
-    armour: "Eine legendäre Rüstung mit mächtigen Boni.",
-    accessory: "Ein legendäres Accessoire mit speziellen Fähigkeiten."
-  };
-  return descriptions[slot] || "Ein einzigartiges Item mit besonderen Eigenschaften.";
-}
-
-function getUniqueMods(slot) {
-  const mods = {
-    weapon: {
-      life: rnd(100, 500),
-      fireDamage: rnd(20, 100),
-      coldDamage: rnd(20, 100),
-      lightningDamage: rnd(20, 100),
-      incPhys: rnd(50, 200),
-      attackSpeed: rnd(10, 50),
-      critChance: rnd(10, 50)
-    },
-    armour: {
-      life: rnd(100, 500),
-      armour: rnd(100, 500),
-      evasion: rnd(100, 500),
-      energyShield: rnd(100, 500),
-      fireRes: rnd(10, 50),
-      coldRes: rnd(10, 50),
-      lightningRes: rnd(10, 50),
-      allRes: rnd(10, 30)
-    },
-    accessory: {
-      str: rnd(10, 50),
-      dex: rnd(10, 50),
-      int: rnd(10, 50),
-      life: rnd(20, 100),
-      mana: rnd(20, 100),
-      fireRes: rnd(10, 30),
-      coldRes: rnd(10, 30),
-      lightningRes: rnd(10, 30),
-      itemRarity: rnd(10, 50),
-      itemQuantity: rnd(10, 30)
-    }
-  };
-
-  const result = {};
-  const statKeys = Object.keys(mods[slot] || mods.weapon);
-  const numStats = rnd(3, 6);
-
-  for (let i = 0; i < numStats; i++) {
-    const stat = pick(statKeys);
-    result[stat] = mods[slot][stat] || mods.weapon[stat];
+// ---- Affix tiers (T1 best .. T6 worst) ----
+// Returns the list of tiers unlocked at a given item level.
+function unlockedAffixTiers(ilvl) {
+  const tiers = [];
+  for (let t = 1; t <= AFFIX_TIER_COUNT; t++) {
+    if ((AFFIX_TIER_ILVL[t] || 1) <= ilvl) tiers.push(t);
   }
-
-  return result;
+  return tiers.length ? tiers : [AFFIX_TIER_COUNT];
 }
 
+// Picks a tier among those unlocked at the given ilvl, weighted so top tiers
+// (T1/T2) are rare and bottom tiers (T5/T6) are common - mirrors PoE drop feel.
+function rollAffixTier(ilvl) {
+  const unlocked = unlockedAffixTiers(ilvl);
+  return pickWeighted(unlocked.map(t => ({value: t, weight: AFFIX_TIER_WEIGHTS[t] || 1})));
+}
+
+// Splits an affix's overall [min,max] into 6 equal bands and returns the
+// [lo,hi] sub-range for the given tier (tier 1 = top band, tier 6 = bottom band).
+function tierValueRange(min, max, tier) {
+  const band = (max - min) / AFFIX_TIER_COUNT;
+  const idxFromWorst = AFFIX_TIER_COUNT - tier;
+  const lo = Math.round(min + band * idxFromWorst);
+  const hi = Math.round(min + band * (idxFromWorst + 1));
+  return [lo, Math.max(lo, hi)];
+}
+
+// Affix pool eligible for a given granular equip slot (untagged affixes = any slot).
+function affixPool(list, equipSlot) {
+  return list.filter(a => {
+    const tags = a[5];
+    return !tags || tags.includes(equipSlot);
+  });
+}
+
+// Rolls affixes onto an item up to `count` total, respecting:
+//  - PoE-style max prefixes/suffixes (1 each for magic, 3 each for rare+)
+//  - per-slot affix tags (a "Rüstung" prefix can't land on a ring, etc.)
+//  - no duplicate stats
+//  - T1-T6 tiers gated by the item's level
 function addRandomAffixes(item, count) {
+  const equipSlot = item.equipSlot || item.slot;
+  const cap = item.rarity === 'magic' ? 1 : 3;
+  const ilvl = item.itemLevel || item.level || 1;
   const usedStats = new Set(item.affixes.map(a => a.stat));
-  const allAffixes = [...PREFIXES, ...SUFFIXES];
+  let prefixCount = item.affixes.filter(a => a.affixType === 'prefix').length;
+  let suffixCount = item.affixes.filter(a => a.affixType === 'suffix').length;
   let attempts = 0;
 
-  while (item.affixes.length < count && attempts < 50) {
+  while (item.affixes.length < count && attempts < 120) {
     attempts++;
-    const affix = pick(allAffixes);
-    const [name, stat, label, min, max, tiers] = affix;
+    const canPrefix = prefixCount < cap;
+    const canSuffix = suffixCount < cap;
+    if (!canPrefix && !canSuffix) break;
+    const wantPrefix = canPrefix && canSuffix ? Math.random() < 0.5 : canPrefix;
 
-    if (usedStats.has(stat)) continue;
+    const pool = affixPool(wantPrefix ? PREFIXES : SUFFIXES, equipSlot).filter(a => !usedStats.has(a[1]));
+    if (pool.length === 0) continue;
 
-    const tier = clamp(Math.ceil((item.itemLevel / 80) * tiers) + rnd(-1, 1), 1, tiers);
-    const tMin = Math.round(min + (max - min) * ((tier - 1) / tiers));
-    const tMax = Math.round(min + (max - min) * (tier / tiers));
-    const value = rnd(tMin, Math.max(tMin, tMax));
+    const [name, stat, label, min, max] = pick(pool);
+    const tier = rollAffixTier(ilvl);
+    const [lo, hi] = tierValueRange(min, max, tier);
+    const value = rnd(lo, hi);
 
-    item.affixes.push({
-      name: name,
-      stat: stat,
-      label: label,
-      value: value,
-      tier: tier
-    });
-
+    item.affixes.push({name, stat, label, value, tier, affixType: wantPrefix ? 'prefix' : 'suffix'});
     item.mods[stat] = (item.mods[stat] || 0) + value;
     usedStats.add(stat);
+    if (wantPrefix) prefixCount++; else suffixCount++;
   }
 }
 
@@ -394,8 +488,17 @@ function equipItem(itemId) {
 
   const item = state.inventory[itemIndex];
 
-  // Check if item fits in any slot
-  const compatibleSlots = EQUIPMENT_SLOTS.filter(slot => slot.slot === item.slot);
+  // Resolve (and backfill, for items from old saves) the item's granular slot
+  const equipSlot = item.equipSlot && EQUIP_SLOT_KEYS.includes(item.equipSlot) ? item.equipSlot : inferEquipSlot(item);
+  if (!equipSlot) {
+    addToLog("Dieses Item passt in keinen Ausrüstungsslot!", 'error');
+    return;
+  }
+  item.equipSlot = equipSlot;
+
+  // Check if item fits in any slot - matched against the granular slot, not
+  // the broad category, so a ring can only ever go into a ring slot etc.
+  const compatibleSlots = EQUIPMENT_SLOTS.filter(slot => slot.accepts === equipSlot);
 
   if (compatibleSlots.length === 0) {
     addToLog("Dieses Item passt in keinen Ausrüstungsslot!", 'error');
@@ -517,6 +620,10 @@ function applyEquipmentStat(stat, value) {
   } else if (stat === 'es' || stat === 'energyShield') {
     state.stats.maxES = (state.stats.maxES || 0) + value;
     state.stats.es = (state.stats.es || 0) + value;
+  } else if (stat === 'allRes') {
+    state.stats.fireRes = (state.stats.fireRes || 0) + value;
+    state.stats.coldRes = (state.stats.coldRes || 0) + value;
+    state.stats.lightningRes = (state.stats.lightningRes || 0) + value;
   } else {
     state.stats[stat] = (state.stats[stat] || 0) + value;
   }
@@ -644,13 +751,19 @@ function unsocketGem(itemId, socketIndex) {
 }
 
 
+// Color-codes an affix tier badge: T1 (best) hot/red fading down to T6 (worst) grey.
+function tierColor(tier) {
+  const colors = {1: '#ff5d5d', 2: '#ff9d4d', 3: '#ffd24d', 4: '#c3e84d', 5: '#7ec8ff', 6: '#9a9a9a'};
+  return colors[tier] || '#aaaaaa';
+}
+
 function createItemHTML(item, inEquipment) {
   const rarityColor = RARITY[item.rarity] ? RARITY[item.rarity].color : '#888';
 
   let html = `
     <div class="item-title">
       <strong style="color:${rarityColor}">${item.icon || ICONS.gem} ${item.name}</strong>
-      ${inEquipment ? `<span style="color:#666;font-size:11px;">${getSlotName(item.slot)}</span>` : ''}
+      ${inEquipment ? `<span style="color:#666;font-size:11px;">${getSlotName(item.equipSlot || item.slot)}</span>` : ''}
     </div>
   `;
 
@@ -669,16 +782,30 @@ function createItemHTML(item, inEquipment) {
       </p>
     `;
   } else if (item.identified !== false && item.rarity !== 'normal') {
-    if (item.affixes && item.affixes.length > 0) {
+    if (item.rarity === 'unique' && item.description) {
+      html += `<p style="color:#ffd700;font-size:11px;margin:4px 0;font-style:italic;">${item.description}</p>`;
+    }
+    if ((item.implicits && item.implicits.length > 0) || (item.affixes && item.affixes.length > 0)) {
       html += `<div class="item-mods">`;
-      item.affixes.forEach(affix => {
+      (item.implicits || []).forEach(im => {
+        const sign = im.value >= 0 ? '+' : '';
+        html += `<span style="color:#9a9aff;font-style:italic;">${im.label}: ${sign}${im.value}</span><br>`;
+      });
+      (item.affixes || []).forEach(affix => {
         const sign = affix.value >= 0 ? '+' : '';
-        html += `${affix.label}: ${sign}${affix.value}<br>`;
+        const tierTag = affix.tier ? ` <span style="color:${tierColor(affix.tier)};">[T${affix.tier}]</span>` : '';
+        html += `${affix.label}: ${sign}${affix.value}${tierTag}<br>`;
       });
       html += `</div>`;
     }
-  } else if (item.rarity === 'unique' && item.description) {
-    html += `<p style="color:#ffd700;font-size:11px;margin:4px 0;font-style:italic;">${item.description}</p>`;
+  } else if (item.implicits && item.implicits.length > 0) {
+    // Normal-rarity items still show their base type's implicit
+    html += `<div class="item-mods">`;
+    item.implicits.forEach(im => {
+      const sign = im.value >= 0 ? '+' : '';
+      html += `<span style="color:#9a9aff;font-style:italic;">${im.label}: ${sign}${im.value}</span><br>`;
+    });
+    html += `</div>`;
   }
 
   if (item.sockets && item.sockets.length > 0) {
