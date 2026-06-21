@@ -233,6 +233,24 @@ function showZoneCompleteScreen(zone, actUnlocked) {
         display: block; margin-left: auto; margin-right: auto;
       ">🌀 Portal zur Stadt öffnen</button>
 
+      ${(function(){
+        // Find the next zone after the completed one
+        const currentIdx = ZONES.findIndex(z => z.name === zone.name);
+        const nextZone = currentIdx >= 0 ? ZONES[currentIdx + 1] : null;
+        // Only show if there IS a next zone and it belongs to an unlocked act
+        if (!nextZone || nextZone.act > (state.unlockedAct || 1)) return '';
+        return `
+        <button onclick="goToNextZone('${nextZone.name}'); document.getElementById('zone-complete-overlay').remove();" style="
+          animation: slideUp 0.5s 0.5s ease-out both;
+          background: linear-gradient(135deg, #1a2a1a, #0a1a0a);
+          border: 2px solid #44aa44; border-radius: 8px;
+          color: #88dd88; font-size: 16px; padding: 14px 36px;
+          cursor: pointer; letter-spacing: 2px; font-family: inherit;
+          width: 100%; max-width: 320px; margin-bottom: 12px;
+          display: block; margin-left: auto; margin-right: auto;
+        ">▶▶ Nächste Zone: ${nextZone.icon || '🗺️'} ${nextZone.name}</button>`;
+      })()}
+
       <button onclick="continueInZone(); document.getElementById('zone-complete-overlay').remove();" style="
         background: transparent; border: 1px solid #444; border-radius: 8px;
         color: #888; font-size: 13px; padding: 10px 24px;
@@ -261,6 +279,27 @@ function continueInZone() {
   resetCombatState();
   addToLog(`⚔️ Weiter im Gebiet – erhöhte Schwierigkeit!`, 'system');
   startWaves(1);
+}
+
+function goToNextZone(zoneName) {
+  if (!state) return;
+  const zone = ZONES.find(z => z.name === zoneName);
+  if (!zone) return;
+
+  if (zone.act <= (state.unlockedAct || 1)) {
+    state.currentZone = zoneName;
+    state.currentMap = null;
+    state.portalOpen = false;
+    state.inTown = false;
+    resetCombatState();
+    spawnMonsterFromZone(zone);
+    renderSkillBar();
+    renderFlasks();
+    if (typeof updateNavCombatState === 'function') updateNavCombatState();
+    addToLog(`▶▶ Betritt ${zone.icon || ''} ${zone.name} (Akt ${zone.act}, Lvl ${zone.lvl})`, 'system');
+    showSection('map');
+    saveGame();
+  }
 }
 
 // ========== PORTAL SYSTEM ==========
