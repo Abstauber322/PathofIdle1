@@ -208,7 +208,10 @@ function calcEffectiveSkill(activeGem, supports) {
   });
 
   const mana = Math.ceil((base.mana || activeGem.mana || 0) * manaMult);
-  const cooldown = Math.max(800, Math.floor(1500 / speed)); // ms
+  let cooldown = Math.max(800, Math.floor(1500 / speed)); // ms
+  // Abklingzeitreduzierung aus dem Passivbaum (gedeckelt, damit Skills nicht spammbar werden)
+  const cdr = Math.min(75, (state && state.stats && state.stats.cooldownReduction) || 0);
+  if (cdr > 0) cooldown = Math.max(250, Math.floor(cooldown * (1 - cdr / 100)));
 
   return {damage, mana, speed, crit, projCount, chains, pierces, leech, cooldown, tags};
 }

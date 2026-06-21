@@ -297,7 +297,8 @@ function calculateBaseStats(attrs, level) {
     chaosRes: 0,
     moveSpeed: 0,
     itemRarity: 0,
-    itemQuantity: 0
+    itemQuantity: 0,
+    cooldownReduction: 0
   };
 }
 
@@ -306,124 +307,171 @@ function calculateBaseStats(attrs, level) {
 let treeViewport = {x: 0, y: 0, scale: 1};
 let treeDragging = false;
 let treeDragStart = {x: 0, y: 0};
-let treeNodePositions = {}; // id -> {cx, cy}
-let treeLayoutCache = null; // {key, positions} - cached so collision relaxation doesn't re-run every pan/zoom frame
+let treeNodePositions = {}; // id -> {cx, cy, r, angle}
+let treeLayoutCache = null;
 
-// Node circle radius used both for drawing and for collision spacing - must match the
-// sizes used in the node-drawing loop further down in renderTree().
 function treeNodeRadius(node) {
-  if (node.type === 'start') return 22;
-  if (node.type === 'keystone') return 18;
-  if (node.type === 'notable') return 13;
+  if (node.type === 'start') return 20;
+  if (node.type === 'keystone') return 16;
+  if (node.type === 'notable') return 12;
   return 8;
 }
 
-// Computes node positions for the given container size, then runs an iterative
-// relaxation pass that pushes any overlapping nodes apart until every pair of
-// nodes has at least MIN_GAP pixels of empty space between their circles.
-// Results are cached per container size since this is somewhat expensive and
-// renderTree() can be called many times per second while panning/zooming.
 function computeTreeLayout(W, H) {
   const key = `${W}x${H}`;
   if (treeLayoutCache && treeLayoutCache.key === key) return treeLayoutCache.positions;
 
-  const CLASS_ANGLES = {
-    Marauder:  210, // bottom-left (strength)
-    Witch:     270, // bottom (int)
-    Ranger:    330, // bottom-right (dex)
-    Shadow:    30,  // right hybrid
-    Templar:   90,  // top-right
-    Duelist:   150, // top-left
-    Scion:     0    // center right
-  };
+  const CX = W / 2, CY = H / 2;
+  const DEG = Math.PI / 180;
+  const STEP = Math.min(W, H) * 0.082;
+  const START_R = STEP * 0.5;
 
-  // How wide (in degrees, +/- from the class's base angle) each class's
-  // branches are allowed to fan out. Pure attribute classes get more room;
-  // hybrid classes sit closer to their neighbours so they stay narrower.
-  const CLASS_HALF_SPREAD = {
-    Marauder: 42, Witch: 42, Ranger: 42,
-    Templar: 38, Duelist: 38, Shadow: 28,
+  const CLASS_ANGLES = {
+    Marauder: 210, Witch: 270, Ranger: 330,
+    Shadow: 30,   Templar: 90, Duelist: 150,
     Scion: 0
   };
 
-  const CX = W / 2, CY = H / 2;
-  const BASE_R = Math.min(W, H) * 0.34;
-  const DEG = Math.PI / 180;
+  const BRANCH_ANGLES = {
+    mar_wucht: 195, mar_robust: 205, mar_zaeh: 215, mar_wild: 225, mar_krieg: 235,
+    wit_elem:  253, wit_mana:   262, wit_geist: 270, wit_diener: 278, wit_frost: 287,
+    ran_praez: 313, ran_wendig: 322, ran_tanz:  330, ran_fallen: 338, ran_adler: 347,
+    sha_meuch:  18, sha_gift:    30, sha_doppel: 42,
+    tem_priest: 78, tem_stand:   90, tem_wacht: 102,
+    due_tanz:  138, due_kampf:  150, due_glad:  162,
+  };
 
-  // Ring -> radius lookup. ring 0 = start nodes, ring 5 = deepest keystones.
-  const RING_R = [0, 0.30, 0.46, 0.64, 0.82, 1.02].map(f => f * BASE_R);
-  const START_R = BASE_R * 0.22;
-  const ringRadius = (ring) => RING_R[Math.min(ring, RING_R.length - 1)] || 0;
-
-  // Initial (idealized) placement - nodes can still overlap at this stage,
-  // especially where a hybrid class's spread crosses a neighbour's, or where
-  // the central hub ring shares a radius with a class's inner ring.
   const positions = {};
+
   Object.entries(PASSIVE_TREE).forEach(([id, node]) => {
+    if (node.type !== 'start') return;
     const cls = node.class;
-
-    if (node.type === 'start') {
-      const angleDeg = CLASS_ANGLES[cls] !== undefined ? CLASS_ANGLES[cls] : 0;
-      const isScion = cls === 'Scion';
-      const r = isScion ? 0 : START_R;
-      const ax = angleDeg * DEG;
-      positions[id] = { cx: CX + r * Math.cos(ax), cy: CY + r * Math.sin(ax) };
-      return;
-    }
-
-    const r = ringRadius(node.ring || 1);
-
-    if (cls === 'all') {
-      // Hub nodes scatter around the full circle; node.t is a 0..1 angle fraction.
-      const a = (node.t || 0) * 2 * Math.PI;
-      positions[id] = { cx: CX + r * Math.cos(a), cy: CY + r * Math.sin(a) };
+    if (cls === 'Scion') {
+      positions[id] = { cx: CX, cy: CY };
     } else {
-      // Class-sector nodes; node.t is -1..1 across the class's angular spread.
-      const baseAngle = (CLASS_ANGLES[cls] !== undefined ? CLASS_ANGLES[cls] : 0) * DEG;
-      const halfSpread = (CLASS_HALF_SPREAD[cls] !== undefined ? CLASS_HALF_SPREAD[cls] : 38) * DEG;
-      const a = baseAngle + (node.t || 0) * halfSpread;
-      positions[id] = { cx: CX + r * Math.cos(a), cy: CY + r * Math.sin(a) };
+      const a = (CLASS_ANGLES[cls] || 0) * DEG;
+      positions[id] = { cx: CX + START_R * Math.cos(a), cy: CY + START_R * Math.sin(a) };
     }
   });
 
-  // --- Collision relaxation pass -----------------------------------------
-  // Every node (including start nodes) is free to move during relaxation -
-  // start nodes begin close together relative to their size, so they need
-  // to be able to spread out too. Repeatedly push apart any pair of nodes
-  // whose circles - plus a 20px buffer - overlap, until nothing overlaps.
-  const MIN_GAP = 20;
-  const ids = Object.keys(positions);
-  const radii = {};
-  ids.forEach(id => { radii[id] = treeNodeRadius(PASSIVE_TREE[id]); });
+  Object.entries(PASSIVE_TREE).forEach(([id, node]) => {
+    if (node.type === 'start' || node.class === 'all') return;
+    const parts = id.split('_');
+    const prefix = parts.slice(0, 2).join('_');
+    const angleDeg = BRANCH_ANGLES[prefix] !== undefined ? BRANCH_ANGLES[prefix] : (CLASS_ANGLES[node.class] || 0);
+    const a = angleDeg * DEG;
+    const ring = node.ring || 1;
+    const r = START_R + ring * STEP;
+    positions[id] = { cx: CX + r * Math.cos(a), cy: CY + r * Math.sin(a) };
+  });
 
-  const MAX_ITER = 600;
-  const DAMPING = 0.55; // resolve overlaps gradually so the layout settles instead of jittering
-  for (let iter = 0; iter < MAX_ITER; iter++) {
-    let anyOverlap = false;
-    for (let i = 0; i < ids.length; i++) {
-      const a = ids[i];
-      const pa = positions[a];
-      for (let j = i + 1; j < ids.length; j++) {
-        const b = ids[j];
-        const pb = positions[b];
-        const minDist = radii[a] + radii[b] + MIN_GAP;
-        let dx = pb.cx - pa.cx, dy = pb.cy - pa.cy;
-        let dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < minDist) {
-          anyOverlap = true;
-          if (dist < 0.01) { dx = Math.random() - 0.5; dy = Math.random() - 0.5; dist = 0.01; }
-          const ux = dx / dist, uy = dy / dist;
-          const push = (minDist - dist) * DAMPING;
-          pa.cx -= ux * push / 2; pa.cy -= uy * push / 2;
-          pb.cx += ux * push / 2; pb.cy += uy * push / 2;
+  const hubByRing = {};
+  Object.entries(PASSIVE_TREE).forEach(([id, node]) => {
+    if (node.class !== 'all') return;
+    const ring = node.ring || 1;
+    (hubByRing[ring] = hubByRing[ring] || []).push({ id, t: node.t || 0 });
+  });
+
+  Object.entries(hubByRing).forEach(([ring, nodes]) => {
+    nodes.sort((a, b) => a.t - b.t);
+    const count = nodes.length;
+    const r = START_R + Number(ring) * (STEP * 0.72);
+    nodes.forEach((h, i) => {
+      const a = ((i / count) * 360 + 15) * DEG;
+      positions[h.id] = { cx: CX + r * Math.cos(a), cy: CY + r * Math.sin(a) };
+    });
+  });
+
+  Object.keys(PASSIVE_TREE).forEach(id => {
+    if (!positions[id]) positions[id] = { cx: CX, cy: CY };
+  });
+
+  // ── Proximity check: if any two nodes are closer than 30px, push them apart ──
+  // Run multiple passes until no pair is closer than MIN_DIST.
+  const MIN_DIST = 30;
+  const allIds = Object.keys(positions);
+  let changed = true;
+  let passes = 0;
+  while (changed && passes < 50) {
+    changed = false;
+    passes++;
+    for (let i = 0; i < allIds.length; i++) {
+      for (let j = i + 1; j < allIds.length; j++) {
+        const a = positions[allIds[i]];
+        const b = positions[allIds[j]];
+        const dx = b.cx - a.cx;
+        const dy = b.cy - a.cy;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < MIN_DIST && dist > 0.01) {
+          changed = true;
+          const push = (MIN_DIST - dist) / 2 + 1;
+          const nx = dx / dist, ny = dy / dist;
+          a.cx -= nx * push;
+          a.cy -= ny * push;
+          b.cx += nx * push;
+          b.cy += ny * push;
         }
       }
     }
-    if (!anyOverlap) break;
+  }
+
+  // ── Group integrity: push foreign nodes out of each class sector ──────────
+  // For each class, compute the centroid of its own nodes, then push any node
+  // belonging to a DIFFERENT class away if it has crept inside the group radius.
+  const GROUP_PADDING = 35; // extra px beyond the group's own max radius
+
+  // Build per-class node lists (exclude 'all' hub nodes – they live everywhere)
+  const classBuckets = {};
+  allIds.forEach(id => {
+    const cls = PASSIVE_TREE[id] ? PASSIVE_TREE[id].class : null;
+    if (!cls || cls === 'all') return;
+    (classBuckets[cls] = classBuckets[cls] || []).push(id);
+  });
+
+  // Repeat a few times so cascading fixes settle
+  for (let pass = 0; pass < 20; pass++) {
+    let anyFix = false;
+    Object.entries(classBuckets).forEach(([cls, members]) => {
+      // Centroid of this class
+      let sx = 0, sy = 0;
+      members.forEach(id => { sx += positions[id].cx; sy += positions[id].cy; });
+      const cx2 = sx / members.length, cy2 = sy / members.length;
+
+      // Max radius of any own member from centroid
+      let maxR = 0;
+      members.forEach(id => {
+        const dx = positions[id].cx - cx2, dy = positions[id].cy - cy2;
+        maxR = Math.max(maxR, Math.sqrt(dx * dx + dy * dy));
+      });
+      const exclusionR = maxR + GROUP_PADDING;
+
+      // Push foreign nodes out of this circle
+      allIds.forEach(foreignId => {
+        const foreignCls = PASSIVE_TREE[foreignId] ? PASSIVE_TREE[foreignId].class : null;
+        if (foreignCls === cls || foreignCls === 'all') return;
+        const p = positions[foreignId];
+        const dx = p.cx - cx2, dy = p.cy - cy2;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < exclusionR && dist > 0.01) {
+          anyFix = true;
+          // Push foreign node outward to the exclusion boundary
+          const scale = exclusionR / dist;
+          p.cx = cx2 + dx * scale;
+          p.cy = cy2 + dy * scale;
+        }
+      });
+    });
+    if (!anyFix) break;
   }
 
   treeLayoutCache = { key, positions };
   return positions;
+}
+
+
+// Build an SVG path for a tree connection – straight line between nodes.
+function treeConnectionPath(from, to, CX, CY) {
+  return `M${from.cx},${from.cy} L${to.cx},${to.cy}`;
 }
 
 function renderTree() {
@@ -450,12 +498,12 @@ function renderTree() {
     Scion:     0
   };
   const CX = W / 2, CY = H / 2;
-  const BASE_R = Math.min(W, H) * 0.34;
+  const STEP = Math.min(W, H) * 0.085;
+  const START_R = STEP * 0.8;
   const DEG = Math.PI / 180;
-  const RING_R = [0, 0.30, 0.46, 0.64, 0.82, 1.02].map(f => f * BASE_R);
-  const INNER_R = RING_R[1];
-  const MID_R = RING_R[3];
-  const OUTER_R = RING_R[5];
+  // Decorative ring radii matching the layout steps
+  const RING_R = [1,2,3,4,5,6].map(i => START_R + i * STEP);
+  const OUTER_R = START_R + 6 * STEP;
 
   // Map each node to a position (cached + collision-resolved so nodes never touch)
   treeNodePositions = computeTreeLayout(W, H);
@@ -488,7 +536,7 @@ function renderTree() {
     svgContent += `<line x1="${CX}" y1="${CY}" x2="${CX + OUTER_R * Math.cos(a)}" y2="${CY + OUTER_R * Math.sin(a)}" stroke="#1e2535" stroke-width="1"/>`;
   });
 
-  // Draw connections
+  // Draw connections (arcs along rings where possible, straight lines for radial hops)
   PASSIVE_TREE_CONNECTIONS.forEach(conn => {
     const from = treeNodePositions[conn.from];
     const to = treeNodePositions[conn.to];
@@ -502,7 +550,8 @@ function renderTree() {
     const partAllocated = state.allocatedPassives.includes(conn.from) || state.allocatedPassives.includes(conn.to);
     const color = allocated ? '#c8a951' : partAllocated ? '#6e5c30' : '#2a3045';
     const width = allocated ? 3 : 2;
-    svgContent += `<line x1="${from.cx}" y1="${from.cy}" x2="${to.cx}" y2="${to.cy}" stroke="${color}" stroke-width="${width}" stroke-opacity="0.85"/>`;
+    const d = treeConnectionPath(from, to, CX, CY);
+    svgContent += `<path d="${d}" fill="none" stroke="${color}" stroke-width="${width}" stroke-opacity="0.85"/>`;
   });
 
   // Draw nodes
